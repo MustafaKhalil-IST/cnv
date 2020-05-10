@@ -1,0 +1,42 @@
+[PAPER] - MANAGING TAIL LATENCY IN DATACENTER-SCALE FILE SYSTEMS UNDER PRODUCTION CONSTRAINTS
+
+Key Concepts:
+Average latency is the average amount of it takes to complete a single transaction.
+Tail latency is the type of latency spikes that it’s not predictable. You can’t plan for it. According to SNIA, these spikes in latency can be up to 10x that of average latency.
+http://blog.virtualstoragezone.com/what-the-heck-is-tail-latency-anyways/
+
+
+Distributed file systems with Large datacenters in presence of competing worloads
+Techniques for managing tail latencies 
+Challenges:
+-hardware heterogeneity
+-interference from other workloads
+-maximize simplicity and maintainability
+
+Scalable Distributed File System (extension of HDFS)
+70k servers in 3 datacenters
+
+[Introduction]
+Afects on Perfomance:
+Component failures
+Replication overhead
+Load imbalance
+Resource contention
+
+Resource-harvesting datacenters share latency-sensitive services with bath jobs. and bath jobs have lower priority and are denied resources.
+
+static heteroginity - hardware
+dynamic heteroginity - performance isolation mechanisms
+
+[work topic]
+Scenario: DFS only stores data for the batch workloads, but the latency-sensitive services have full priority over shared resources.
+Goal: reduce tail latency for batch workloads. service performance - protected by isolation techniques that the paper will not aproach.
+
+Why lower the latency for batch jobs:
+1- if they are faster there's more free space for others
+2- performance predictability and user satisfaction
+3- less use of them if they take too long
+
+SE - Speculative Execution - tracks tasks duration and duplicates them to manage tail latency on batch worloads.
+
+
