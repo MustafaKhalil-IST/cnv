@@ -29,6 +29,7 @@ public class WebServer {
 
 
 		server.createContext("/sudoku", new MyHandler());
+		server.createContext("/test", new TestHandler());
 
 		// be aware! infinite pool of threads!
 		server.setExecutor(Executors.newCachedThreadPool());
@@ -55,6 +56,34 @@ public class WebServer {
 
         return buf.toString();
     }
+	static class TestHandler implements HttpHandler {
+		@Override
+		public void handle(final HttpExchange t) throws IOException {
+			final Headers hdrs = t.getResponseHeaders();
+			hdrs.add("Content-Type", "application/json");
+
+			hdrs.add("Access-Control-Allow-Origin", "*");
+
+			hdrs.add("Access-Control-Allow-Credentials", "true");
+			hdrs.add("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS");
+			hdrs.add("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
+
+			response = "test:True"
+			t.sendResponseHeaders(200, response.length());
+
+
+			final OutputStream os = t.getResponseBody();
+			OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+			osw.write(response);
+			osw.flush();
+			osw.close();
+
+			os.close();
+
+			System.out.println("> Sent response to " + t.getRemoteAddress().toString());
+		}
+	}
+
 	static class MyHandler implements HttpHandler {
 		@Override
 		public void handle(final HttpExchange t) throws IOException {
