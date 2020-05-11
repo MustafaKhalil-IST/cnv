@@ -1,18 +1,20 @@
+package store;
+
 import java.util.logging.Logger;
 
 public class Request {
     private static Logger logger = Logger.getLogger(Request.class.getName());
     String requestID;
-    int dim;
-    int missed;
+    Integer dimension;
+    Integer missed;
     String strategy;
 
-    public Request () {
+    public Request() {
     }
 
-    public Request(String requestID, int dim, int missed, String strategy) {
+    public Request(String requestID, Integer dimension, Integer missed, String strategy) {
         this.requestID = requestID;
-        this.dim = dim;
+        this.dimension = dimension;
         this.missed = missed;
         this.strategy = strategy;
     }
@@ -25,19 +27,19 @@ public class Request {
         this.requestID = requestID;
     }
 
-    public int getDim() {
-        return dim;
+    public Integer getDimension() {
+        return dimension;
     }
 
-    public void setDim(int dim) {
-        this.dim = dim;
+    public void setDimension(Integer dimension) {
+        this.dimension = dimension;
     }
 
-    public int getMissed() {
+    public Integer getMissed() {
         return missed;
     }
 
-    public void setMissed(int missed) {
+    public void setMissed(Integer missed) {
         this.missed = missed;
     }
 
@@ -49,3 +51,5 @@ public class Request {
         this.strategy = strategy;
     }
 }
+
+
