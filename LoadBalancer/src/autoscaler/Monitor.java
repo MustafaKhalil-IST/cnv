@@ -15,8 +15,8 @@ public class Monitor  extends TimerTask {
     private int position = 0;
 
     public Monitor(int period) {
-        this.maxArraySize = Math.max(AutoScaler.UPSCALE_POLICY.secondsWithLoad, AutoScaler.DOWNSCALE_POLICY.secondsWithLoad) / period;
-        this.minArraySize = Math.min(AutoScaler.UPSCALE_POLICY.secondsWithLoad, AutoScaler.DOWNSCALE_POLICY.secondsWithLoad) / period;
+        this.maxArraySize = Math.max(AutoScaler.UPSCALE.secondsWithLoad, AutoScaler.DOWNSCALE.secondsWithLoad) / period;
+        this.minArraySize = Math.min(AutoScaler.UPSCALE.secondsWithLoad, AutoScaler.DOWNSCALE.secondsWithLoad) / period;
     }
 
     @Override
@@ -27,10 +27,10 @@ public class Monitor  extends TimerTask {
             } else {
                 AutoScaler.load.add(InstancesManager.getInstance().getAverageLoad());
             }
-            if (AutoScaler.getUpscaleLoad() > AutoScaler.UPSCALE_POLICY.loadPercentage) {
+            if (AutoScaler.getUpscaleLoad() > AutoScaler.UPSCALE.loadPercentage) {
                 InstancesManager.getInstance().createInstance(InstanceProxy.MAX_LOAD);
                 AutoScaler.load = new ArrayList<>(0);
-            } else if (AutoScaler.getDownScaleLoad() < AutoScaler.DOWNSCALE_POLICY.loadPercentage) {
+            } else if (AutoScaler.getDownScaleLoad() < AutoScaler.DOWNSCALE.loadPercentage) {
                 InstancesManager.getInstance().shutDownLaziestInstance();
                 AutoScaler.load = new ArrayList<>(0);
             }

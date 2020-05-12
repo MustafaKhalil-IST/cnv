@@ -7,12 +7,12 @@ import java.util.Timer;
 
 public class AutoScaler implements Runnable{
     static PropertiesReader reader = PropertiesReader.getInstance();
-    public static ScalingPolicy UPSCALE_POLICY = new ScalingPolicy(reader.getIntegerProperty("autoscale.upscale.load"),
-            reader.getIntegerProperty("autoscale.upscale.seconds.over.load"),
-            reader.getIntegerProperty("autoscale.max.workers"));
-    public static ScalingPolicy DOWNSCALE_POLICY = new ScalingPolicy(reader.getIntegerProperty("autoscale.downscale.load"),
-                    reader.getIntegerProperty("autoscale.downscale.seconds.below.load"),
-                    reader.getIntegerProperty("autoscale.min.workers"));
+    public static ScalingPolicy UPSCALE = new ScalingPolicy(reader.getNumericalProperty("autoscale.upscale.load"),
+            reader.getNumericalProperty("autoscale.upscale.seconds.over.load"),
+            reader.getNumericalProperty("autoscale.max.instances"));
+    public static ScalingPolicy DOWNSCALE = new ScalingPolicy(reader.getNumericalProperty("autoscale.downscale.load"),
+                    reader.getNumericalProperty("autoscale.downscale.seconds.below.load"),
+                    reader.getNumericalProperty("autoscale.min.instances"));
     static Timer monitor = new Timer();
     static ArrayList<Double> load = new ArrayList<>();
     static final int measurePeriod = 5000;
@@ -32,12 +32,12 @@ public class AutoScaler implements Runnable{
 
     public static Double getUpscaleLoad() {
         double totalLoad = 0;
-        int upscaleEntries = UPSCALE_POLICY.secondsWithLoad / measurePeriod;
-        int pos = 0;
+        int upscaleEntries = UPSCALE.secondsWithLoad / measurePeriod;
+        int index = 0;
         for (Double reading: load) {
-            if (pos > upscaleEntries)
+            if (index > upscaleEntries)
                 totalLoad += reading;
-            pos++;
+            index++;
         }
         return totalLoad;
     }
@@ -45,12 +45,12 @@ public class AutoScaler implements Runnable{
 
     public static Double getDownScaleLoad() {
         double totalLoad = 0;
-        int downScaleEntries = DOWNSCALE_POLICY.secondsWithLoad / measurePeriod;
-        int pos = 0;
+        int downScaleEntries = DOWNSCALE.secondsWithLoad / measurePeriod;
+        int index = 0;
         for (Double reading: load) {
-            if (pos > downScaleEntries)
+            if (index > downScaleEntries)
                 totalLoad += reading;
-            pos++;
+            index++;
         }
         return totalLoad;
     }

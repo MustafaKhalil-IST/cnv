@@ -72,7 +72,7 @@ public class InstancesManager {
     }
 
     public void createInstance(long complexity) {
-        if (instances.size() < AutoScaler.UPSCALE_POLICY.instances && complexity/InstanceProxy.MAX_LOAD > 0) {
+        if (instances.size() < AutoScaler.UPSCALE.instances && complexity/InstanceProxy.MAX_LOAD > 0) {
             addInstance(InstanceProxy.requestNewWorker(ec2));
         }
     }
@@ -108,7 +108,7 @@ public class InstancesManager {
     }
 
     public void shutDownLaziestInstance() {
-        if (instances.size() == AutoScaler.DOWNSCALE_POLICY.instances) {
+        if (instances.size() == AutoScaler.DOWNSCALE.instances) {
             return;
         }
         Collections.sort(instances, InstanceProxy.LOAD_COMPARATOR);

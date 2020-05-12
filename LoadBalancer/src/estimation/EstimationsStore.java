@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 public class EstimationsStore {
     AmazonDynamoDB client;
     DynamoDBMapper mapper;
-    private static final double TOLERANCE = 0.1;
     private static Logger logger = Logger.getLogger(EstimationsStore.class.getName());
     private static EstimationsStore instance = null;
 
@@ -36,7 +35,7 @@ public class EstimationsStore {
         try {
             credentialsProvider = new DefaultAWSCredentialsProviderChain();
         } catch (Exception e) {
-            throw new RuntimeException("Error loading credentials", e);
+            throw new RuntimeException("Credentials Not Found", e);
         }
 
         client = AmazonDynamoDBClientBuilder
@@ -52,7 +51,6 @@ public class EstimationsStore {
         try {
             TableUtils.waitUntilActive(client, StoredEstimation.TABLE);
         } catch (InterruptedException e) {
-            logger.warning("Could not wait for table to be active.");
             logger.warning(e.getMessage());
         }
     }

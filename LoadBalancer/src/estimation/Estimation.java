@@ -15,10 +15,8 @@ public class Estimation extends TimerTask {
 
     @Override
     public void run() {
-        logger.info("Estimating metrics.");
         PaginatedScanList<Metrics> metricsToWorkOn = Store.getStore().getRequestMetricsToProcess();
         if (metricsToWorkOn == null || metricsToWorkOn.isEmpty()) {
-            logger.info("There are no metrics to process.");
             return;
         }
         for (Metrics metric: metricsToWorkOn) {

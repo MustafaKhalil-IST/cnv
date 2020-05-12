@@ -41,7 +41,7 @@ public class PropertiesReader {
         return prop.getProperty(property);
     }
 
-    public Integer getIntegerProperty(String property) {
+    public Integer getNumericalProperty(String property) {
         return Integer.parseInt(prop.getProperty(property));
     }
 }

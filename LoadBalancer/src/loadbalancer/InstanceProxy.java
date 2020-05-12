@@ -16,7 +16,7 @@ public class InstanceProxy {
     private final static Logger logger = Logger.getLogger(InstanceProxy.class.getName());
 
     public final static long MAX_LOAD = 10000000L;
-    final static int STATUS_CHECK_INTERVAL = PropertiesReader.getInstance().getIntegerProperty("status.check.interval.ms");
+    final static int STATUS_CHECK_INTERVAL = PropertiesReader.getInstance().getNumericalProperty("status.check.interval.ms");
     String address;
     String instanceID;
     Long currentLoad = 0L;
