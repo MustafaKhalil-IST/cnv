@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.net.HttpURLConnection;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,13 +21,36 @@ import java.util.concurrent.Executors;
 
 public class WebServer {
 
+	private static void register() {
+		HttpURLConnection connection = null;
+		try {
+			// TODO
+			String address = "IP";
+			String id = "RANDOM";
+			URL url = null;
+			url = new URL("http://localhost:8181/register?ip=" + address + "&id=" + id);
+			logger.info("connecting to: " + url.toString());
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+
+			connection.setUseCaches(false);
+			connection.setDoInput(true);
+			logger.info(connection.getResponseMessage());
+		} catch (Exception e) {
+			logger.warning("Could not register at loadbalancer");
+			logger.warning(e.getMessage());
+		} finally {
+			if (connection != null) {
+				connection.disconnect();
+			}
+		}
+	}
+
 	public static void main(final String[] args) throws Exception {
 
 		//final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 8000), 0);
 
 		final HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
-
-
 
 		server.createContext("/sudoku", new MyHandler());
 		server.createContext("/test", new TestHandler());
@@ -56,6 +80,7 @@ public class WebServer {
 
         return buf.toString();
     }
+
 	static class TestHandler implements HttpHandler {
 		@Override
 		public void handle(final HttpExchange t) throws IOException {

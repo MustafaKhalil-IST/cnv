@@ -3,8 +3,6 @@ package estimation;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
 import store.Metrics;
 import store.Store;
-
-
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
@@ -28,10 +26,9 @@ public class Estimation extends TimerTask {
             double real = metric.getNumberOfCalls();
             double ratio = guess / real;
             if (ratio >= 1 + acceptableAmount || ratio <= 1 - acceptableAmount) {
-                EstimationsStore.getStore().storeEstimate(metricToStoredEstimation(metric));
+                EstimationsStore.getStore().storeEstimation(metricToStoredEstimation(metric));
             }
             Store.getStore().deleteMetric(metric);
-
         }
     }
 

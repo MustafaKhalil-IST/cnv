@@ -15,6 +15,7 @@ import properties.PropertiesReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Logger;
 
 public class InstancesManager {
@@ -75,6 +76,11 @@ public class InstancesManager {
             addInstance(InstanceProxy.requestNewWorker(ec2));
         }
     }
+
+    public InstanceProxy getRandomInstance() {
+        return instances.get(new Random().nextInt(instances.size()));
+    }
+
 
     private void queryForWorkers() {
         DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
