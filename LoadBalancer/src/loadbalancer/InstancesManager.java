@@ -77,6 +77,7 @@ public class InstancesManager {
         }
     }
 
+    // TODO
     public InstanceProxy getRandomInstance() {
         return instances.get(new Random().nextInt(instances.size()));
     }
@@ -104,6 +105,14 @@ public class InstancesManager {
         }
         if (instances.isEmpty()) {
             addInstance(InstanceProxy.requestNewWorker(ec2));
+        }
+    }
+
+    public void shutDown() {
+        for (InstanceProxy instance: instances) {
+            if (instance.status.equals(InstanceStatus.ACTIVE)) {
+                instance.startShutDown();
+            }
         }
     }
 

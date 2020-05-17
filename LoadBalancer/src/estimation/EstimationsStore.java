@@ -35,7 +35,7 @@ public class EstimationsStore {
         try {
             credentialsProvider = new DefaultAWSCredentialsProviderChain();
         } catch (Exception e) {
-            throw new RuntimeException("Credentials Not Found", e);
+            throw new RuntimeException("Credentials not found or not correct!", e);
         }
 
         client = AmazonDynamoDBClientBuilder

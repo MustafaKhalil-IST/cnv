@@ -21,21 +21,21 @@ public class Monitor  extends TimerTask {
 
     @Override
     public void run() {
-        if (AutoScaler.load.size() >= minArraySize) {
-            if (AutoScaler.load.size() >= maxArraySize) {
-                AutoScaler.load.set(position, InstancesManager.getInstance().getAverageLoad());
+        if (AutoScaler.loadReadings.size() >= minArraySize) {
+            if (AutoScaler.loadReadings.size() >= maxArraySize) {
+                AutoScaler.loadReadings.set(position, InstancesManager.getInstance().getAverageLoad());
             } else {
-                AutoScaler.load.add(InstancesManager.getInstance().getAverageLoad());
+                AutoScaler.loadReadings.add(InstancesManager.getInstance().getAverageLoad());
             }
             if (AutoScaler.getUpscaleLoad() > AutoScaler.UPSCALE.loadPercentage) {
                 InstancesManager.getInstance().createInstance(InstanceProxy.MAX_LOAD);
-                AutoScaler.load = new ArrayList<>(0);
+                AutoScaler.loadReadings = new ArrayList<>(0);
             } else if (AutoScaler.getDownScaleLoad() < AutoScaler.DOWNSCALE.loadPercentage) {
                 InstancesManager.getInstance().shutDownLaziestInstance();
-                AutoScaler.load = new ArrayList<>(0);
+                AutoScaler.loadReadings = new ArrayList<>(0);
             }
         } else {
-            AutoScaler.load.add(InstancesManager.getInstance().getAverageLoad());
+            AutoScaler.loadReadings.add(InstancesManager.getInstance().getAverageLoad());
         }
         position = (position + 1) % maxArraySize;
 

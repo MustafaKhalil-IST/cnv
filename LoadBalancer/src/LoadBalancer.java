@@ -1,4 +1,6 @@
+import autoscaler.AutoScaler;
 import com.sun.net.httpserver.HttpServer;
+import estimation.Estimator;
 import loadbalancer.InstanceCreationhandler;
 import loadbalancer.InstancesManager;
 import loadbalancer.LoadBalanceHandler;
@@ -9,23 +11,45 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-public class LoadBalancer  implements Runnable{
+public class LoadBalancer  implements Runnable {
     private final static Logger logger = Logger.getLogger(LoadBalancer.class.getName());
     private final static int PORT    = Integer.getInteger("balancer.port", 8181);
-    private LoadBalanceHandler loadBalancerHandler = new LoadBalanceHandler();
+    private final static LoadBalancer balancer = new LoadBalancer();
+    private LoadBalanceHandler loadBalanceHandler = new LoadBalanceHandler();
     private InstanceCreationhandler instanceCreationhandler = new InstanceCreationhandler();
+    private HttpServer httpServer;
+    private ExecutorService executor;
+    private Estimator estimator = new Estimator();
+
+    static void shutdown() {
+        try {
+            logger.info("Shutting down the LoadBalancer!");
+            balancer.httpServer.stop(0);
+        } catch (Exception e) {
+            logger.warning("There was an exception when shutting down the server, check the stacktrace");
+            logger.warning(e.getMessage());
+            e.printStackTrace();
+        } finally {
+            logger.info("Server shut down!");
+        }
+
+        synchronized (balancer) {
+            balancer.notifyAll();
+        }
+    }
 
     @Override
     public void run() {
         try {
-            ExecutorService executor = Executors.newCachedThreadPool();
-
-            HttpServer httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
-            httpServer.createContext("/sudoku", loadBalancerHandler);
+            executor = Executors.newCachedThreadPool();
+            httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
+            httpServer.createContext("/sudoku", loadBalanceHandler);
             httpServer.createContext("/instances", instanceCreationhandler);
 
             httpServer.setExecutor(executor);
             httpServer.start();
+
+            estimator.run();
 
             InstancesManager.getInstance().start();
 
@@ -43,5 +67,47 @@ public class LoadBalancer  implements Runnable{
             logger.warning(t.getMessage());
             t.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        LoadBalancer balancer = new LoadBalancer();
+        Thread serverThread = new Thread(balancer);
+        serverThread.start();
+        Thread autoScalerThread = new Thread(new AutoScaler());
+        autoScalerThread.start();
+        Thread estimatorThread = new Thread(new Estimator());
+        estimatorThread.start();
+        Runtime.getRuntime().addShutdownHook(new OnShutdown());
+        new Shutdown().start();
+        try {
+            serverThread.join();
+            autoScalerThread.interrupt();
+            estimatorThread.interrupt();
+            logger.info("Load Balancer has been terminated");
+        } catch (Exception e) {
+            logger.warning("Load Balancer Exception");
+            logger.warning(e.getMessage());
+        }
+    }
+
+}
+
+
+class OnShutdown extends Thread {
+    public void run() {
+        LoadBalancer.shutdown();
+    }
+}
+
+class Shutdown extends Thread {
+    public void run() {
+        try {
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        InstancesManager.getInstance().shutDown();
+        LoadBalancer.shutdown();
+        Runtime.getRuntime().exit(0);
     }
 }

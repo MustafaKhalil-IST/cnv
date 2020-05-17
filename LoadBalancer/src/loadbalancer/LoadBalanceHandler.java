@@ -43,14 +43,14 @@ public class LoadBalanceHandler implements HttpHandler {
             credentialsProvider = new DefaultAWSCredentialsProviderChain();
         }
         catch (Exception e) {
-            throw new RuntimeException("Error loading credentials", e);
+            throw new RuntimeException("Credentials not found or not correct", e);
         }
         ec2 = AmazonEC2ClientBuilder
                 .standard()
                 .withRegion(Regions.US_EAST_1)
                 .withCredentials(credentialsProvider)
                 .build();
-        logger.info("done creating AmazonEC2Client");
+        logger.info("Load Balancer is created!");
     }
 
     private Request getRequest(String query) {
@@ -92,7 +92,7 @@ public class LoadBalanceHandler implements HttpHandler {
     private byte[] sendRequest(Request request, long complexity) {
         HttpURLConnection connection = null;
         try {
-            InstanceProxy instance = InstancesManager.getInstance().getRandomInstance();
+            InstanceProxy instance = InstancesManager.getInstance().getRandomInstance(); // TODO
             instance.addRequest(request, complexity);
 
             URL url = new URL("http://" + instance.getAddress() + "/sudoku?" + request.getQuery());

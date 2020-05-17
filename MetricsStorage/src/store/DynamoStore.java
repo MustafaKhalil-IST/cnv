@@ -21,6 +21,8 @@ import java.util.logging.Logger;
 public class DynamoStore {
     AmazonDynamoDB client;
     DynamoDBMapper mapper;
+    Map<Long, Request> requestInformation = new HashMap<>();
+    protected final long MINIMUM_UPDATE = 1000000L;
     private static Logger logger = Logger.getLogger(DynamoStore.class.getName());
 
     public DynamoStore() {
@@ -33,7 +35,7 @@ public class DynamoStore {
             credentialsProvider = new DefaultAWSCredentialsProviderChain();
         }
         catch (Exception e) {
-            throw new RuntimeException("Error loading credentials", e);
+            throw new RuntimeException("Credentials not found", e);
         }
 
         client = AmazonDynamoDBClientBuilder
@@ -57,9 +59,6 @@ public class DynamoStore {
 
     }
 
-    Map<Long, Request> requestInformation = new HashMap<>();
-    protected final long MIN_METHOD_UPDATE = 1000000L;
-
     public void setRequestInformation(long threadID, Request request) {
         this.requestInformation.put(threadID, request);
     }
@@ -68,26 +67,22 @@ public class DynamoStore {
         return this.requestInformation.get(threadID);
     }
 
-    protected boolean update(long currentMethodCount) {
-        return (currentMethodCount % MIN_METHOD_UPDATE) == 0;
-    }
-
-    public void updateMethodCount(long threadID, long currentMethodCount) {
-        if (update(currentMethodCount)) {
+    public void updateCallsCount(long threadID, long currentMethodCount) {
+        if ((currentMethodCount % MINIMUM_UPDATE) == 0) {
             Request request = getRequestInformation(threadID);
             Metrics requestMetrics = mapper.load(Metrics.class, request.getRequestID());
             if (requestMetrics == null) {
                 requestMetrics = new Metrics(request);
             } else {
                 long currentMethods = requestMetrics.getCurrentNumberOfCalls();
-                currentMethods += MIN_METHOD_UPDATE;
+                currentMethods += MINIMUM_UPDATE;
                 requestMetrics.setCurrentNumberOfCalls(currentMethods);
             }
             mapper.save(requestMetrics);
         }
     }
 
-    public void storeFinalMethodCount(long threadID, long methodCount) {
+    public void storeCallsCount(long threadID, long methodCount) {
         Request request = getRequestInformation(threadID);
         Metrics metrics = mapper.load(Metrics.class, request.getRequestID());
         if (metrics == null) {
@@ -111,7 +106,7 @@ public class DynamoStore {
         Map<String, AttributeValue> values = new HashMap<>();
         values.put(":zero", new AttributeValue().withN(String.valueOf(0)));
         return mapper.scan(Metrics.class, new DynamoDBScanExpression()
-                .withFilterExpression("finalMethods > :zero")
+                .withFilterExpression("numberOfCalls > :zero")
                 .withExpressionAttributeValues(values));
     }
 
