@@ -46,7 +46,6 @@ public class Instrumentation {
             Routine routine = (Routine) e.nextElement();
             routine.addBefore("Instrumentation", "updateCount", new Integer(1));
             if (routine.getMethodName().contentEquals("solveSudoku")) {
-		System.out.println("Stored: " + Thread.currentThread().getId());
                 routine.addAfter("Instrumentation", "storeCount", ci.getClassName());
             }
         }
@@ -54,13 +53,15 @@ public class Instrumentation {
     }
 
     public static synchronized void storeCount(String str) {
+	System.out.println("store " + Thread.currentThread().getId() + " count " + count.get(Thread.currentThread().getId()));
         Store.getStore().storeCallsCount(Thread.currentThread().getId(), count.get(Thread.currentThread().getId()));
         count.put(Thread.currentThread().getId(), 0);
     }
 
     public static synchronized void updateCount(int incr) {
         Integer calls_count = count.get(Thread.currentThread().getId());
-        if (calls_count == null) {
+        System.out.println("update " + Thread.currentThread().getId() + " count " + calls_count);
+	if (calls_count == null) {
             count.put(Thread.currentThread().getId(), 0);
         } else {
             count.put(Thread.currentThread().getId(), calls_count + 1);
