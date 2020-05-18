@@ -62,6 +62,7 @@ public class DynamoStore {
     }
 
     public void setRequestInformation(long threadID, Request request) {
+	System.out.println("set request: " + threadID + " " + request.getStrategy());
         this.requestInformation.put(threadID, request);
     }
 
