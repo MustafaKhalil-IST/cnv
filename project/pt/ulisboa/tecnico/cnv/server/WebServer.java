@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
+import java.util.UUID;
 
 public class WebServer {
 
@@ -132,13 +133,13 @@ public class WebServer {
 
 			newArgs.add("-d");
 
-			System.out.println("Creating a request");
-			System.out.println("parsing ...");
+			// System.out.println("Creating a request");
+			// System.out.println("parsing ...");
 			System.out.println(Integer.parseInt(requestArgs.get(2)) + " - " + Integer.parseInt(requestArgs.get(1)) + " - " + requestArgs.get(0) + " - " + requestArgs.get(4));
-			Request request = new Request("", Integer.parseInt(requestArgs.get(2)), Integer.parseInt(requestArgs.get(1)), requestArgs.get(0), requestArgs.get(4));
-			System.out.println("a request is created");
+			Request request = new Request(UUID.randomUUID().toString(), Integer.parseInt(requestArgs.get(2)), Integer.parseInt(requestArgs.get(1)), requestArgs.get(0), requestArgs.get(4));
+			// System.out.println("a request is create
 			Store.getStore().setRequestInformation(Thread.currentThread().getId(), request);
-			System.out.println("a request is stored");
+			// System.out.println("a request is stored");
 
 			// Store from ArrayList into regular String[].
 			final String[] args = new String[newArgs.size()];

@@ -3,6 +3,7 @@ package store;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
 
 @DynamoDBTable(tableName = Metrics.TABLE)
 public class Metrics {
@@ -31,11 +32,12 @@ public class Metrics {
         this.requestID = requestID;
     }
 
-    // @DynamoDBTypeConverted(converter = QueryTypeConverter.class)
+    @DynamoDBTypeConverted(converter = RequestConverter.class)
     @DynamoDBAttribute(attributeName = "request")
     public Request getRequest() {
         return request;
     }
+
 
     @DynamoDBAttribute(attributeName = "request")
     public void setRequest(Request request) {

@@ -22,7 +22,7 @@ public class DynamoStore {
     AmazonDynamoDB client;
     DynamoDBMapper mapper;
     Map<Long, Request> requestInformation = new HashMap<>();
-    protected final long MINIMUM_UPDATE = 10000L;
+    protected final long MINIMUM_UPDATE = 1000L;
     private static Logger logger = Logger.getLogger(DynamoStore.class.getName());
 
     public DynamoStore() {
@@ -46,8 +46,6 @@ public class DynamoStore {
 
         mapper = new DynamoDBMapper(client);
 
-	System.out.println("mapper is null: " + (mapper == null));
-
         CreateTableRequest req = mapper.generateCreateTableRequest(Metrics.class);
 
         req.setProvisionedThroughput(new ProvisionedThroughput(10L, 10L));
@@ -62,7 +60,6 @@ public class DynamoStore {
     }
 
     public void setRequestInformation(long threadID, Request request) {
-	System.out.println("set request: " + threadID + " " + request.getStrategy());
         this.requestInformation.put(threadID, request);
     }
 
@@ -72,7 +69,7 @@ public class DynamoStore {
 
     public void updateCallsCount(long threadID, long currentMethodCount) {
         if ((currentMethodCount % MINIMUM_UPDATE) == 0) {
-	    System.out.println("update");
+	    System.out.println("[DEBUG]: UPDATE");
             Request request = getRequestInformation(threadID);
             Metrics requestMetrics = mapper.load(Metrics.class, request.getRequestID());
             if (requestMetrics == null) {
@@ -95,9 +92,10 @@ public class DynamoStore {
         if (metrics == null) {
             metrics = new Metrics(request);
         }
-	    System.out.println("2 - metric is null: " + (metrics == null));
+	System.out.println("2 - metric is null: " + (metrics == null));
         metrics.setNumberOfCalls(methodCount);
         mapper.save(metrics);
+	System.out.println("metrics saved " + methodCount);
     }
 
     public void storeEstimate(Request request, long estimate) {
