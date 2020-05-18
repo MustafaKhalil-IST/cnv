@@ -10,7 +10,7 @@ public class Instrumentation {
     private static HashMap<Long, Integer> count =  new HashMap<>();
 
     public static void main(String[] args) {
-
+	System.out.println("Instrumenting");
         String outputFolder = args[1];
 
         if (args[0].endsWith(".class")) {
@@ -41,11 +41,12 @@ public class Instrumentation {
         // create class info object
         ClassInfo ci;
         ci = new ClassInfo(srcFolder + System.getProperty("file.separator") + filename);
-
+        System.out.println("Instrumenting ...");
         for (Enumeration e = ci.getRoutines().elements(); e.hasMoreElements(); ) {
             Routine routine = (Routine) e.nextElement();
             routine.addBefore("Instrumentation", "updateCount", new Integer(1));
             if (routine.getMethodName().contentEquals("solveSudoku")) {
+		System.out.println("Stored: " + Thread.currentThread().getId());
                 routine.addAfter("Instrumentation", "storeCount", ci.getClassName());
             }
         }
