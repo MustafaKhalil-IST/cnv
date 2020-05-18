@@ -8,7 +8,8 @@ import org.json.JSONArray;
 import pt.ulisboa.tecnico.cnv.solver.Solver;
 import pt.ulisboa.tecnico.cnv.solver.SolverArgumentParser;
 import pt.ulisboa.tecnico.cnv.solver.SolverFactory;
-
+import store.Store;
+import store.Request;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -131,6 +132,9 @@ public class WebServer {
 			newArgs.add(parseRequestBody(t.getRequestBody()));
 
 			newArgs.add("-d");
+
+			Request request = new Request("", Integer.parseInt(newArgs[2]), Integer.parseInt(newArgs[1]), newArgs[0], newArgs[4]);
+			Store.getStore().setRequestInformation(Thread.currentThread().getId(), request);
 
 			// Store from ArrayList into regular String[].
 			final String[] args = new String[newArgs.size()];

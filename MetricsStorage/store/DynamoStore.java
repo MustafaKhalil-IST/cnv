@@ -22,7 +22,7 @@ public class DynamoStore {
     AmazonDynamoDB client;
     DynamoDBMapper mapper;
     Map<Long, Request> requestInformation = new HashMap<>();
-    protected final long MINIMUM_UPDATE = 100000L;
+    protected final long MINIMUM_UPDATE = 10000L;
     private static Logger logger = Logger.getLogger(DynamoStore.class.getName());
 
     public DynamoStore() {
@@ -86,15 +86,15 @@ public class DynamoStore {
     }
 
     public void storeCallsCount(long threadID, long methodCount) {
-	Request request = getRequestInformation(threadID);
-	System.out.println("request: " + (request == null));
-	System.out.println("mapper: " + (mapper == null));
+        Request request = getRequestInformation(threadID);
+        System.out.println("request: " + (request == null));
+        System.out.println("mapper: " + (mapper == null));
         Metrics metrics = mapper.load(Metrics.class, request.getRequestID());
         System.out.println("1 - metric is null: " + (metrics == null));
         if (metrics == null) {
             metrics = new Metrics(request);
         }
-	System.out.println("2 - metric is null: " + (metrics == null));
+	    System.out.println("2 - metric is null: " + (metrics == null));
         metrics.setNumberOfCalls(methodCount);
         mapper.save(metrics);
     }
