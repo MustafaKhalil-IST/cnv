@@ -134,6 +134,13 @@ public class WebServer {
 			System.out.println(Integer.parseInt(requestArgs.get(2)) + " - " + Integer.parseInt(requestArgs.get(1)) + " - " + requestArgs.get(0) + " - " + requestArgs.get(4));
 			Request request = new Request(UUID.randomUUID().toString(), Integer.parseInt(requestArgs.get(2)), Integer.parseInt(requestArgs.get(1)), requestArgs.get(0), requestArgs.get(4));
 
+			try {
+				FileWriter fw = new FileWriter("/home/ec2-user/debug.txt");
+				fw.write("store: " + (Store.getStore() == null));
+				fw.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			Store.getStore().setRequestInformation(Thread.currentThread().getId(), request);
 
 			final String[] args = new String[newArgs.size()];
