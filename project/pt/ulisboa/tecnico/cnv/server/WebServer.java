@@ -12,12 +12,14 @@ import store.dynamo.Request;
 import store.dynamo.Store;
 
 import java.io.*;
+import java.net.URL;
 import java.net.InetSocketAddress;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.Executors;
+import java.util.UUID;
 
 public class WebServer {
 
@@ -27,8 +29,7 @@ public class WebServer {
 			// TODO
 			String address = "IP";
 			String id = "RANDOM";
-			URL url = null;
-			url = new URL("http://localhost:8181/register?ip=" + address + "&id=" + id);
+			URL url = new URL("http://localhost:8001/register?ip=" + address + "&id=" + id);
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 
@@ -129,12 +130,12 @@ public class WebServer {
 			newArgs.add(parseRequestBody(t.getRequestBody()));
 
 			newArgs.add("-d");
+
 			System.out.println(Integer.parseInt(requestArgs.get(2)) + " - " + Integer.parseInt(requestArgs.get(1)) + " - " + requestArgs.get(0) + " - " + requestArgs.get(4));
 			Request request = new Request(UUID.randomUUID().toString(), Integer.parseInt(requestArgs.get(2)), Integer.parseInt(requestArgs.get(1)), requestArgs.get(0), requestArgs.get(4));
 
 			Store.getStore().setRequestInformation(Thread.currentThread().getId(), request);
 
-			// Store from ArrayList into regular String[].
 			final String[] args = new String[newArgs.size()];
 			int i = 0;
 			for(String arg: newArgs) {
