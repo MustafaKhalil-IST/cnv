@@ -54,6 +54,14 @@ public class DynamoStore {
                 .withRegion(Regions.US_EAST_1)
                 .build();
 
+        try {
+            FileWriter fw = new FileWriter("/home/ec2-user/debug.txt");
+            fw.write("credentials are there");
+            fw.close();
+        } catch (Exception io) {
+            System.out.println(2);
+        }
+
         mapper = new DynamoDBMapper(client);
 
         CreateTableRequest req = mapper.generateCreateTableRequest(Metrics.class);
