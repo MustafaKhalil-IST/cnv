@@ -8,8 +8,8 @@ import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import estimation.EstimationsStore;
-import store.dynamo.Request;
-import store.dynamo.Store;
+import storage.dynamo.Request;
+import storage.dynamo.Store;
 
 import java.io.DataInputStream;
 import java.io.IOException;
