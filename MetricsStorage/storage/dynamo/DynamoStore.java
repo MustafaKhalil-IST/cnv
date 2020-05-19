@@ -14,6 +14,8 @@ import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 
+import java.io.FileWriter;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -35,6 +37,14 @@ public class DynamoStore {
             credentialsProvider = new DefaultAWSCredentialsProviderChain();
         }
         catch (Exception e) {
+            try {
+                FileWriter fw = new FileWriter("/home/ec2-user/debug.txt");
+                fw.write(e.getMessage());
+                fw.close();
+            } catch (Exception io) {
+                System.out.println(2);
+            }
+
             throw new RuntimeException("Credentials not found", e);
         }
 
