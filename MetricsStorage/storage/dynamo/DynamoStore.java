@@ -32,6 +32,13 @@ public class DynamoStore {
     }
 
     public void init() {
+        try {
+            FileWriter fw = new FileWriter("/home/ec2-user/debug.txt");
+            fw.write("init");
+            fw.close();
+        } catch (Exception io) {
+            System.out.println(2);
+        }
         AWSCredentialsProviderChain credentialsProvider;
         try {
             credentialsProvider = new DefaultAWSCredentialsProviderChain();
@@ -48,19 +55,19 @@ public class DynamoStore {
             throw new RuntimeException("Credentials not found", e);
         }
 
+        try {
+            FileWriter fw = new FileWriter("/home/ec2-user/debug.txt");
+            fw.write("creds are there");
+            fw.close();
+        } catch (Exception io) {
+            System.out.println(2);
+        }
+
         client = AmazonDynamoDBClientBuilder
                 .standard()
                 .withCredentials(credentialsProvider)
                 .withRegion(Regions.US_EAST_1)
                 .build();
-
-        try {
-            FileWriter fw = new FileWriter("/home/ec2-user/debug.txt");
-            fw.write("credentials are there");
-            fw.close();
-        } catch (Exception io) {
-            System.out.println(2);
-        }
 
         mapper = new DynamoDBMapper(client);
 
