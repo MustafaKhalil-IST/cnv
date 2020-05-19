@@ -1,4 +1,4 @@
-package store.dynamo;
+package storage.dynamo;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverter;
 import java.util.logging.Logger;
 import java.util.UUID;

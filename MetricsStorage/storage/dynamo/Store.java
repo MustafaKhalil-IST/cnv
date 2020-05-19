@@ -1,4 +1,4 @@
-package store.dynamo;
+package storage.dynamo;
 
 public class Store {
     private static DynamoStore store = new DynamoStore();

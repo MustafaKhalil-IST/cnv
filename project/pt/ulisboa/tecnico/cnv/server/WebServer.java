@@ -8,8 +8,8 @@ import org.json.JSONArray;
 import pt.ulisboa.tecnico.cnv.solver.Solver;
 import pt.ulisboa.tecnico.cnv.solver.SolverArgumentParser;
 import pt.ulisboa.tecnico.cnv.solver.SolverFactory;
-import store.dynamo.Request;
-import store.dynamo.Store;
+import storage.dynamo.Request;
+import storage.dynamo.Store;
 
 import java.io.*;
 import java.net.URL;

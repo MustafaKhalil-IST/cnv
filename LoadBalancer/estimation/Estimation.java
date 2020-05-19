@@ -1,8 +1,8 @@
 package estimation;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
-import store.dynamo.Metrics;
-import store.dynamo.Store;
+import storage.dynamo.Metrics;
+import storage.dynamo.Store;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
