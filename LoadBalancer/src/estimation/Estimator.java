@@ -1,6 +1,6 @@
-package estimation;
+package src.estimation;
 
-import properties.PropertiesReader;
+import src.properties.PropertiesReader;
 
 import java.util.Timer;
 

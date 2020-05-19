@@ -1,4 +1,4 @@
-package estimation;
+package src.estimation;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
 import storage.dynamo.Metrics;

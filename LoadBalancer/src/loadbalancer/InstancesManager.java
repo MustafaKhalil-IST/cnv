@@ -1,6 +1,6 @@
-package loadbalancer;
+package src.loadbalancer;
 
-import autoscaler.AutoScaler;
+import src.autoscaler.AutoScaler;
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
@@ -10,7 +10,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceStateName;
 import com.amazonaws.services.ec2.model.Reservation;
-import properties.PropertiesReader;
+import src.properties.PropertiesReader;
 
 import java.util.ArrayList;
 import java.util.Collections;

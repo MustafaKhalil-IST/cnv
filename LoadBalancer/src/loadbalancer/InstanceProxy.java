@@ -1,8 +1,8 @@
-package loadbalancer;
+package src.loadbalancer;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
-import properties.PropertiesReader;
+import src.properties.PropertiesReader;
 import storage.dynamo.Request;
 
 import java.util.Comparator;

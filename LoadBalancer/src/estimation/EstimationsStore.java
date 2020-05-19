@@ -1,4 +1,4 @@
-package estimation;
+package src.estimation;
 
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;

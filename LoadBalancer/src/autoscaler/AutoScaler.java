@@ -1,6 +1,6 @@
-package autoscaler;
+package src.autoscaler;
 
-import properties.PropertiesReader;
+import src.properties.PropertiesReader;
 
 import java.util.ArrayList;
 import java.util.Timer;

@@ -1,4 +1,4 @@
-package loadbalancer;
+package src.loadbalancer;
 
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
@@ -7,7 +7,7 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import estimation.EstimationsStore;
+import src.estimation.EstimationsStore;
 import storage.dynamo.Request;
 import storage.dynamo.Store;
 

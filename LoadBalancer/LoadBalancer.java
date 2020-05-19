@@ -1,9 +1,9 @@
-import autoscaler.AutoScaler;
+import src.autoscaler.AutoScaler;
 import com.sun.net.httpserver.HttpServer;
-import estimation.Estimator;
-import loadbalancer.InstanceCreationhandler;
-import loadbalancer.InstancesManager;
-import loadbalancer.LoadBalanceHandler;
+import src.estimation.Estimator;
+import src.loadbalancer.InstanceCreationhandler;
+import src.loadbalancer.InstancesManager;
+import src.loadbalancer.LoadBalanceHandler;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,12 +13,11 @@ import java.util.logging.Logger;
 
 public class LoadBalancer  implements Runnable {
     private final static Logger logger = Logger.getLogger(LoadBalancer.class.getName());
-    private final static int PORT    = Integer.getInteger("balancer.port", 8181);
+    private final static int PORT    = 8001;
     private final static LoadBalancer balancer = new LoadBalancer();
     private LoadBalanceHandler loadBalanceHandler = new LoadBalanceHandler();
     private InstanceCreationhandler instanceCreationhandler = new InstanceCreationhandler();
     private HttpServer httpServer;
-    private ExecutorService executor;
     private Estimator estimator = new Estimator();
 
     static void shutdown() {
@@ -41,7 +40,7 @@ public class LoadBalancer  implements Runnable {
     @Override
     public void run() {
         try {
-            executor = Executors.newCachedThreadPool();
+            ExecutorService executor = Executors.newCachedThreadPool();
             httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
             httpServer.createContext("/sudoku", loadBalanceHandler);
             httpServer.createContext("/instances", instanceCreationhandler);
@@ -69,7 +68,7 @@ public class LoadBalancer  implements Runnable {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         LoadBalancer balancer = new LoadBalancer();
         Thread serverThread = new Thread(balancer);
         serverThread.start();

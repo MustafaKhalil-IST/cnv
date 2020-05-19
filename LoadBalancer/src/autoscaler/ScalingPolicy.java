@@ -1,4 +1,4 @@
-package autoscaler;
+package src.autoscaler;
 
 public class ScalingPolicy {
     public int secondsWithLoad;

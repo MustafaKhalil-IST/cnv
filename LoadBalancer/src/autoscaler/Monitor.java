@@ -1,7 +1,7 @@
-package autoscaler;
+package src.autoscaler;
 
-import loadbalancer.InstanceProxy;
-import loadbalancer.InstancesManager;
+import src.loadbalancer.InstanceProxy;
+import src.loadbalancer.InstancesManager;
 
 import java.util.ArrayList;
 import java.util.TimerTask;
