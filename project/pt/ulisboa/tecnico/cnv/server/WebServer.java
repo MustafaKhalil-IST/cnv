@@ -8,16 +8,15 @@ import org.json.JSONArray;
 import pt.ulisboa.tecnico.cnv.solver.Solver;
 import pt.ulisboa.tecnico.cnv.solver.SolverArgumentParser;
 import pt.ulisboa.tecnico.cnv.solver.SolverFactory;
-import store.Store;
-import store.Request;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
+import store.dynamo.Request;
+import store.dynamo.Store;
+
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.HttpURLConnection;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 
 public class WebServer {
@@ -30,16 +29,13 @@ public class WebServer {
 			String id = "RANDOM";
 			URL url = null;
 			url = new URL("http://localhost:8181/register?ip=" + address + "&id=" + id);
-			logger.info("connecting to: " + url.toString());
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 
 			connection.setUseCaches(false);
 			connection.setDoInput(true);
-			logger.info(connection.getResponseMessage());
 		} catch (Exception e) {
-			logger.warning("Could not register at loadbalancer");
-			logger.warning(e.getMessage());
+			System.out.println("Could not register at loadbalancer");
 		} finally {
 			if (connection != null) {
 				connection.disconnect();
@@ -94,7 +90,7 @@ public class WebServer {
 			hdrs.add("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS");
 			hdrs.add("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
 
-			response = "test:True"
+			String response = "test:True";
 			t.sendResponseHeaders(200, response.length());
 
 
@@ -120,20 +116,22 @@ public class WebServer {
 
 			// Break it down into String[].
 			final String[] params = query.split("&");
-
+			ArrayList<String> requestArgs = new ArrayList<>();
 			// Store as if it was a direct call to SolverMain.
 			final ArrayList<String> newArgs = new ArrayList<>();
 			for (final String p : params) {
 				final String[] splitParam = p.split("=");
 				newArgs.add("-" + splitParam[0]);
+				requestArgs.add(splitParam[1]);
 				newArgs.add(splitParam[1]);
 			}
 			newArgs.add("-b");
 			newArgs.add(parseRequestBody(t.getRequestBody()));
 
 			newArgs.add("-d");
+			System.out.println(Integer.parseInt(requestArgs.get(2)) + " - " + Integer.parseInt(requestArgs.get(1)) + " - " + requestArgs.get(0) + " - " + requestArgs.get(4));
+			Request request = new Request(UUID.randomUUID().toString(), Integer.parseInt(requestArgs.get(2)), Integer.parseInt(requestArgs.get(1)), requestArgs.get(0), requestArgs.get(4));
 
-			Request request = new Request("", Integer.parseInt(newArgs[2]), Integer.parseInt(newArgs[1]), newArgs[0], newArgs[4]);
 			Store.getStore().setRequestInformation(Thread.currentThread().getId(), request);
 
 			// Store from ArrayList into regular String[].

@@ -1,4 +1,4 @@
-package store;
+package store.dynamo;
 
 
 import com.amazonaws.auth.AWSCredentialsProviderChain;

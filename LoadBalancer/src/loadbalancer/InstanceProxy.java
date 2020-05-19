@@ -3,7 +3,7 @@ package loadbalancer;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
 import properties.PropertiesReader;
-import store.Request;
+import store.dynamo.Request;
 
 import java.util.Comparator;
 import java.util.HashMap;

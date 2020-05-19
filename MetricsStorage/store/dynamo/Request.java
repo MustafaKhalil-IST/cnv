@@ -1,4 +1,4 @@
-package store;
+package store.dynamo;
 
 import java.util.logging.Logger;
 

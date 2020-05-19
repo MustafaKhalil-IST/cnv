@@ -1,6 +1,6 @@
 import BIT.highBIT.ClassInfo;
 import BIT.highBIT.Routine;
-import store.Store;
+import store.dynamo.Store;
 
 import java.io.File;
 import java.util.Enumeration;

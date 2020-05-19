@@ -2,7 +2,7 @@ package estimation;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import store.Request;
+import store.dynamo.Request;
 
 @DynamoDBTable(tableName = StoredEstimation.TABLE)
 public class StoredEstimation {
