@@ -8,18 +8,20 @@ import java.util.Timer;
 public class AutoScaler implements Runnable{
     static PropertiesReader reader = PropertiesReader.getInstance();
     static Timer monitor = new Timer();
-    public static ScalingPolicy UPSCALE = new ScalingPolicy(reader.getNumericalProperty("autoscale.upscale.load"),
-            reader.getNumericalProperty("autoscale.upscale.seconds.over.load"),
-            reader.getNumericalProperty("autoscale.max.instances"));
-    public static ScalingPolicy DOWNSCALE = new ScalingPolicy(reader.getNumericalProperty("autoscale.downscale.load"),
-                    reader.getNumericalProperty("autoscale.downscale.seconds.below.load"),
-                    reader.getNumericalProperty("autoscale.min.instances"));
+    public static ScalingPolicy INCREASE = new ScalingPolicy(
+            reader.getNumericalProperty("auto-scale.increase.load"),
+            reader.getNumericalProperty("auto-scale.increase.load.for.more.than"),
+            reader.getNumericalProperty("auto-scale.increase.max.instances"));
+    public static ScalingPolicy DECREASE = new ScalingPolicy(
+            reader.getNumericalProperty("auto-scale.decrease.load"),
+            reader.getNumericalProperty("auto-scale.decrease.load.for.more.than"),
+            reader.getNumericalProperty("auto-scale.decrease.min.instances"));
     static ArrayList<Double> loadReadings = new ArrayList<>();
     static final int period = 5000;
 
     @Override
     public void run() {
-        monitor.schedule(new Monitor(period / 1000), period, period);
+        monitor.schedule(new AutoScaleTask(period / 1000), period, period);
     }
 
     public static Double getTotalLoad() {
@@ -30,25 +32,21 @@ public class AutoScaler implements Runnable{
         return totalLoad;
     }
 
-    public static Double getUpscaleLoad() {
+    public static Double getIncreasedLoad() {
         double totalLoad = 0;
-        int upscaleEntries = UPSCALE.secondsWithLoad / period;
-        for(int i = 0; i < loadReadings.size(); i++) {
-            if (i > upscaleEntries) {
-                totalLoad += loadReadings.get(i);
-            }
+        int upscaleEntries = INCREASE.getPeriodToAct() / period;
+        for(int i = upscaleEntries + 1; i < loadReadings.size(); i++) {
+            totalLoad += loadReadings.get(i);
         }
         return totalLoad;
     }
 
 
-    public static Double getDownScaleLoad() {
+    public static Double getDecreasedLoad() {
         double totalLoad = 0;
-        int downScaleEntries = DOWNSCALE.secondsWithLoad / period;
-        for(int i = 0; i < loadReadings.size(); i++) {
-            if (i > downScaleEntries) {
-                totalLoad += loadReadings.get(i);
-            }
+        int downScaleEntries = DECREASE.getPeriodToAct() / period;
+        for(int i = downScaleEntries + 1; i < loadReadings.size(); i++) {
+            totalLoad += loadReadings.get(i);
         }
         return totalLoad;
     }

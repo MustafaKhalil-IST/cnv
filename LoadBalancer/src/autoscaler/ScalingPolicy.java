@@ -1,13 +1,37 @@
 package src.autoscaler;
 
 public class ScalingPolicy {
-    public int secondsWithLoad;
-    public int loadPercentage;
-    public int instances;
+    private int periodToAct;
+    private int loadPercentageToAct;
+    private int numberOfWorkers;
 
-    public ScalingPolicy(int loadPercentage, int secondsWithLoad, int instances) {
-        this.secondsWithLoad = secondsWithLoad;
-        this.loadPercentage = loadPercentage;
-        this.instances = instances;
+    public ScalingPolicy(int loadPercentage, int periodToAct, int numberOfWorkers) {
+        this.periodToAct = periodToAct;
+        this.loadPercentageToAct = loadPercentage;
+        this.numberOfWorkers = numberOfWorkers;
+    }
+
+    public int getPeriodToAct() {
+        return periodToAct;
+    }
+
+    public void setPeriodToAct(int periodToAct) {
+        this.periodToAct = periodToAct;
+    }
+
+    public int getLoadPercentageToAct() {
+        return loadPercentageToAct;
+    }
+
+    public void setLoadPercentageToAct(int loadPercentageToAct) {
+        this.loadPercentageToAct = loadPercentageToAct;
+    }
+
+    public int getNumberOfWorkers() {
+        return numberOfWorkers;
+    }
+
+    public void setNumberOfWorkers(int numberOfWorkers) {
+        this.numberOfWorkers = numberOfWorkers;
     }
 }

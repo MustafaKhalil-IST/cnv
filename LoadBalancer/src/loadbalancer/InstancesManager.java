@@ -47,15 +47,13 @@ public class InstancesManager {
         for (Reservation reservation : reservations) {
             for(Instance instance : reservation.getInstances()){
                 if (instance.getState().getName().equals(InstanceStateName.Running.toString()) &&
-                        instance.getImageId().equals(reader.getStringProperty("render.image.id")) &&
-                        instance.getInstanceType().equals(reader.getStringProperty("render.instance.type"))) {
+                        instance.getImageId().equals(reader.getStringProperty("image.id")) &&
+                        instance.getInstanceType().equals(reader.getStringProperty("instance.type"))) {
 
                     instances.add(new InstanceProxy(instance.getPublicIpAddress(), instance.getInstanceId()));
 
                     logger.info("Adding " + instance.getInstanceId() + " " + instance.getState().getName() + " " +
-                            instance.getImageId() + " " +
-                            instance.getInstanceType() + " " +
-                            instance.getIamInstanceProfile().getArn());
+                            instance.getImageId() + " " + instance.getInstanceType());
                 }
             }
         }
@@ -92,7 +90,7 @@ public class InstancesManager {
     }
 
     public void createInstance(long complexity) {
-        if (instances.size() < AutoScaler.UPSCALE.instances && complexity/InstanceProxy.MAX_LOAD > 0) {
+        if (instances.size() < AutoScaler.INCREASE.getNumberOfWorkers() && complexity/InstanceProxy.MAX_LOAD > 0) {
             addInstance(InstanceProxy.connectToAnInstance(ec2));
         }
     }
@@ -111,7 +109,7 @@ public class InstancesManager {
     }
 
     public void shutDownLaziestInstance() {
-        if (instances.size() == AutoScaler.DOWNSCALE.instances) {
+        if (instances.size() == AutoScaler.DECREASE.getNumberOfWorkers()) {
             return;
         }
         Collections.sort(instances, InstanceProxy.LOAD_COMPARATOR);

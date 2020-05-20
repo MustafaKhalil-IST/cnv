@@ -48,8 +48,6 @@ public class LoadBalancer  implements Runnable {
             httpServer.setExecutor(executor);
             httpServer.start();
 
-            estimator.run();
-
             InstancesManager.getSingleton().start();
 
             synchronized (this) {
@@ -69,8 +67,8 @@ public class LoadBalancer  implements Runnable {
     }
 
     public static void main(String[] args) {
-        Thread serverThread = new Thread(new LoadBalancer());
-        serverThread.start();
+        Thread balancerThread = new Thread(new LoadBalancer());
+        balancerThread.start();
         Thread autoScalerThread = new Thread(new AutoScaler());
         autoScalerThread.start();
         Thread estimatorThread = new Thread(new Estimator());
@@ -78,7 +76,7 @@ public class LoadBalancer  implements Runnable {
         Runtime.getRuntime().addShutdownHook(new OnShutdown());
         new Shutdown().start();
         try {
-            serverThread.join();
+            balancerThread.join();
             autoScalerThread.interrupt();
             estimatorThread.interrupt();
             logger.info("Load Balancer has been terminated");

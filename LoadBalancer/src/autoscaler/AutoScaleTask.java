@@ -5,18 +5,15 @@ import src.loadbalancer.InstancesManager;
 
 import java.util.ArrayList;
 import java.util.TimerTask;
-import java.util.logging.Logger;
 
-public class Monitor  extends TimerTask {
-    private final static Logger logger = Logger.getLogger(Monitor.class.getName());
-
+public class AutoScaleTask extends TimerTask {
     private int maxArraySize;
     private int minArraySize;
     private int position = 0;
 
-    public Monitor(int period) {
-        this.maxArraySize = Math.max(AutoScaler.UPSCALE.secondsWithLoad, AutoScaler.DOWNSCALE.secondsWithLoad) / period;
-        this.minArraySize = Math.min(AutoScaler.UPSCALE.secondsWithLoad, AutoScaler.DOWNSCALE.secondsWithLoad) / period;
+    public AutoScaleTask(int period) {
+        this.maxArraySize = Math.max(AutoScaler.INCREASE.getPeriodToAct(), AutoScaler.DECREASE.getPeriodToAct()) / period;
+        this.minArraySize = Math.min(AutoScaler.INCREASE.getPeriodToAct(), AutoScaler.DECREASE.getPeriodToAct()) / period;
     }
 
     @Override
@@ -27,10 +24,10 @@ public class Monitor  extends TimerTask {
             } else {
                 AutoScaler.loadReadings.add(InstancesManager.getSingleton().getAverageLoad());
             }
-            if (AutoScaler.getUpscaleLoad() > AutoScaler.UPSCALE.loadPercentage) {
+            if (AutoScaler.getIncreasedLoad() > AutoScaler.INCREASE.getLoadPercentageToAct()) {
                 InstancesManager.getSingleton().createInstance(InstanceProxy.MAX_LOAD);
                 AutoScaler.loadReadings = new ArrayList<>(0);
-            } else if (AutoScaler.getDownScaleLoad() < AutoScaler.DOWNSCALE.loadPercentage) {
+            } else if (AutoScaler.getDecreasedLoad() < AutoScaler.DECREASE.getLoadPercentageToAct()) {
                 InstancesManager.getSingleton().shutDownLaziestInstance();
                 AutoScaler.loadReadings = new ArrayList<>(0);
             }
