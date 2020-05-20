@@ -5,6 +5,7 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import storage.dynamo.Request;
@@ -103,12 +104,31 @@ public class LoadBalanceHandler implements HttpHandler {
         byte[] buffer = redirectAndProcessRequestByWorker(request, complexity, body);
         if (buffer != null) {
             logger.info("The response is " + Arrays.toString(buffer));
+
+            final Headers hdrs = t.getResponseHeaders();
+
+            hdrs.add("Content-Type", "application/json");
+
+            hdrs.add("Access-Control-Allow-Origin", "*");
+
+            hdrs.add("Access-Control-Allow-Credentials", "true");
+            hdrs.add("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS");
+            hdrs.add("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
+
             t.sendResponseHeaders(200, buffer.length);
-            OutputStream outputStream = t.getResponseBody();
-            outputStream.write(buffer);
-            outputStream.close();
+
+            final OutputStream os = t.getResponseBody();
+            OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+            osw.write(Arrays.toString(buffer));
+            osw.flush();
+            osw.close();
+
+            os.close();
+
+            logger.info("> Sent response to " + t.getRemoteAddress().toString());
+
         } else {
-            System.out.println("empty buffer");
+            logger.warning("empty buffer");
         }
     }
 
