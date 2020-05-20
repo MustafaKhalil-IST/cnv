@@ -18,7 +18,6 @@ public class LoadBalancer  implements Runnable {
     private LoadBalanceHandler loadBalanceHandler = new LoadBalanceHandler();
     private InstanceCreationhandler instanceCreationhandler = new InstanceCreationhandler();
     private HttpServer httpServer;
-    private Estimator estimator = new Estimator();
 
     static void shutdown() {
         try {
@@ -71,14 +70,14 @@ public class LoadBalancer  implements Runnable {
         balancerThread.start();
         Thread autoScalerThread = new Thread(new AutoScaler());
         autoScalerThread.start();
-        Thread estimatorThread = new Thread(new Estimator());
-        estimatorThread.start();
+        // Thread estimatorThread = new Thread(new Estimator());
+        // estimatorThread.start();
         Runtime.getRuntime().addShutdownHook(new OnShutdown());
         new Shutdown().start();
         try {
             balancerThread.join();
             autoScalerThread.interrupt();
-            estimatorThread.interrupt();
+            // estimatorThread.interrupt();
             logger.info("Load Balancer has been terminated");
         } catch (Exception e) {
             logger.warning("Load Balancer Exception");
