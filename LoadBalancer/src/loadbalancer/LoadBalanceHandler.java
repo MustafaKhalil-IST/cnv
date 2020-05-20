@@ -100,7 +100,8 @@ public class LoadBalanceHandler implements HttpHandler {
         long complexity  = estimateComplexity(request);
         byte[] buffer = redirectAndProcessRequestByWorker(request, complexity, body);
         if (buffer != null) {
-            logger.info("The response is " + Arrays.toString(buffer));
+            String response = Arrays.toString(buffer);
+            logger.info("The response is " + response);
 
             final Headers hdrs = t.getResponseHeaders();
 
@@ -112,31 +113,15 @@ public class LoadBalanceHandler implements HttpHandler {
             hdrs.add("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS");
             hdrs.add("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
 
-            logger.info("headers are set");
-
-            t.sendResponseHeaders(200, Arrays.toString(buffer).length());
-
-            logger.info("response start to send");
+            t.sendResponseHeaders(200, response.length());
 
             final OutputStream os = t.getResponseBody();
-
-            logger.info("response start to send");
-
             OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
 
-            logger.info("osw");
-
             osw.write(Arrays.toString(buffer));
-
-            logger.info("written");
             osw.flush();
-
-            logger.info("flush");
             osw.close();
-
             os.close();
-
-            logger.info("response is written");
 
             logger.info("> Sent response to " + t.getRemoteAddress().toString());
 
