@@ -84,7 +84,7 @@ public class InstancesManager {
         double totalLoad = 0;
         for (InstanceProxy instance: instances) {
             nrInstances++;
-            totalLoad += instance.getLoad();
+            totalLoad += instance.getLoadPercentage();
         }
         return totalLoad / nrInstances;
     }

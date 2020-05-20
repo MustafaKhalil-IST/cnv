@@ -14,7 +14,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -147,20 +146,13 @@ public class LoadBalanceHandler implements HttpHandler {
                 connection.getOutputStream().write(body.getBytes("UTF8"));
             }
 
-            // char[] buffer = new char[connection.getContentLength()];
-
             InputStream is = connection.getInputStream();
             InputStreamReader isr = new InputStreamReader(is);
             BufferedReader in = new BufferedReader(isr);
             String buffer = in.readLine();
             in.close();
-            /*
-            DataInputStream is = new DataInputStream((connection.getInputStream()));
-            byte[] buffer = new byte[connection.getContentLength()];
-            is.readFully(buffer);
-             */
 
-            instance.processRequest(request);
+            instance.updateInstanceLoad(request);
             return buffer;
         } catch (Exception e) {
             e.printStackTrace();

@@ -10,7 +10,6 @@ public class StoredEstimation {
     private Request request;
 
     public StoredEstimation() {
-
     }
 
     public StoredEstimation(Request request) {

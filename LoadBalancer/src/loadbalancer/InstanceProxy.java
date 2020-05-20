@@ -22,13 +22,13 @@ public class InstanceProxy {
     Long currentLoad = 0L;
     InstanceStatus status;
     HashMap<String, Request> currentRequests = new HashMap<>();
-    HashMap<String, Long> requestEstimatedComplexity = new HashMap<>();
+    HashMap<String, Long> estimatedRequestsLoads = new HashMap<>();
     Timer checkStatus = new Timer();
 
     static final Comparator<InstanceProxy> LOAD_COMPARATOR = new Comparator<InstanceProxy>() {
         @Override
         public int compare(InstanceProxy o1, InstanceProxy o2) {
-            return o1.getLoad().compareTo(o2.getLoad());
+            return o1.getLoadPercentage().compareTo(o2.getLoadPercentage());
         }
     };
 
@@ -46,26 +46,26 @@ public class InstanceProxy {
 
     public synchronized void addRequest(Request request, long estimatedComplexity) {
         currentLoad += estimatedComplexity;
-        requestEstimatedComplexity.put(request.getRequestID(), estimatedComplexity);
+        estimatedRequestsLoads.put(request.getRequestID(), estimatedComplexity);
         currentRequests.put(request.getRequestID(), request);
     }
 
-    public Long getLoad() {
+    public Long getLoadPercentage() {
         return currentLoad / MAX_LOAD * 100;
     }
 
-    public synchronized void processRequest(Request request) {
-        long complexity = requestEstimatedComplexity.get(request.getRequestID());
-        currentLoad -= complexity;
-        requestEstimatedComplexity.remove(request.getRequestID());
+    public synchronized void updateInstanceLoad(Request request) {
+        long estimatedLoad = estimatedRequestsLoads.get(request.getRequestID());
+        currentLoad -= estimatedLoad;
+        estimatedRequestsLoads.remove(request.getRequestID());
         currentRequests.remove(request.getRequestID());
     }
 
     private synchronized void shutDown(AmazonEC2 client) {
         status = InstanceStatus.STOPPING;
-        TerminateInstancesRequest termInstanceReq = new TerminateInstancesRequest();
-        termInstanceReq.withInstanceIds(instanceID);
-        client.terminateInstances(termInstanceReq);
+        TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest();
+        terminateInstancesRequest.withInstanceIds(instanceID);
+        client.terminateInstances(terminateInstancesRequest);
     }
 
     public static InstanceProxy connectToAnInstance(AmazonEC2 client) {
