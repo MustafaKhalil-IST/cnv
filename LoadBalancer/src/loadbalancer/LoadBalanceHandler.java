@@ -9,9 +9,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import storage.dynamo.Request;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -76,13 +74,33 @@ public class LoadBalanceHandler implements HttpHandler {
         return new Request(UUID.randomUUID().toString(), dimension, missed, strategy, puzzle);
     }
 
+    private static String parseRequestBody(InputStream is) throws IOException {
+        InputStreamReader isr =  new InputStreamReader(is,"utf-8");
+        BufferedReader br = new BufferedReader(isr);
+
+        // From now on, the right way of moving from bytes to utf-8 characters:
+
+        int b;
+        StringBuilder buf = new StringBuilder(512);
+        while ((b = br.read()) != -1) {
+            buf.append((char) b);
+
+        }
+
+        br.close();
+        isr.close();
+
+        return buf.toString();
+    }
+
     @Override
     public void handle(HttpExchange t) throws IOException {
         logger.info("A request " + t.getRequestURI().getQuery() + " has been received");
         Request request = getRequestFromQuery(t.getRequestURI().getQuery());
+        String body = parseRequestBody(t.getRequestBody());
         queries.put(t, request);
         long complexity  = estimateComplexity(request);
-        byte[] buffer = redirectAndProcessRequestByWorker(request, complexity);
+        byte[] buffer = redirectAndProcessRequestByWorker(request, complexity, body);
         if (buffer != null) {
             logger.info("The response is " + Arrays.toString(buffer));
             t.sendResponseHeaders(200, buffer.length);
@@ -94,7 +112,7 @@ public class LoadBalanceHandler implements HttpHandler {
         }
     }
 
-    private byte[] redirectAndProcessRequestByWorker(Request request, long complexity) {
+    private byte[] redirectAndProcessRequestByWorker(Request request, long complexity, String body) {
         HttpURLConnection connection = null;
         try {
             InstanceProxy instance = InstancesManager.getSingleton().getRandomInstance(); // TODO
@@ -103,9 +121,14 @@ public class LoadBalanceHandler implements HttpHandler {
             logger.info("The request will be redirected to: " + instance.getAddress());
             URL url = new URL("http://" + instance.getAddress() + "/sudoku?" + request.getQuery());
             connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
             connection.setUseCaches(false);
             connection.setDoInput(true);
+            connection.addRequestProperty("Content-Type", "application/" + "POST");
+            if (body != null) {
+                connection.setRequestProperty("Content-Length", Integer.toString(body.length()));
+                connection.getOutputStream().write(body.getBytes("UTF8"));
+            }
+
 
             DataInputStream is = new DataInputStream((connection.getInputStream()));
             byte[] buffer = new byte[connection.getContentLength()];
