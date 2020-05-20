@@ -7,9 +7,7 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import src.estimation.EstimationsStore;
 import storage.dynamo.Request;
-import storage.dynamo.Store;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -50,10 +48,9 @@ public class LoadBalanceHandler implements HttpHandler {
                 .withRegion(Regions.US_EAST_1)
                 .withCredentials(credentialsProvider)
                 .build();
-        logger.info("Load Balancer is created!");
     }
 
-    private Request getRequest(String query) {
+    private Request getRequestFromQuery(String query) {
         String[] queries = query.split("&");
         String strategy = "";
         int dimension = 0;
@@ -79,20 +76,24 @@ public class LoadBalanceHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange t) throws IOException {
-        Request request = getRequest(t.getRequestURI().getQuery());
+        Request request = getRequestFromQuery(t.getRequestURI().getQuery());
         queries.put(t, request);
         long complexity  = estimateComplexity(request);
-        byte[] buffer = redirectRequest(request, complexity);
-        t.sendResponseHeaders(200, buffer.length);
-        OutputStream outputStream = t.getResponseBody();
-        outputStream.write(buffer);
-        outputStream.close();
+        byte[] buffer = redirectAndProcessRequestByWorker(request, complexity);
+        if (buffer != null) {
+            t.sendResponseHeaders(200, buffer.length);
+            OutputStream outputStream = t.getResponseBody();
+            outputStream.write(buffer);
+            outputStream.close();
+        } else {
+            System.out.println("empty buffer");
+        }
     }
 
-    private byte[] redirectRequest(Request request, long complexity) {
+    private byte[] redirectAndProcessRequestByWorker(Request request, long complexity) {
         HttpURLConnection connection = null;
         try {
-            InstanceProxy instance = InstancesManager.getInstance().getRandomInstance(); // TODO
+            InstanceProxy instance = InstancesManager.getSingleton().getRandomInstance(); // TODO
             instance.addRequest(request, complexity);
 
             URL url = new URL("http://" + instance.getAddress() + "/sudoku?" + request.getQuery());
@@ -105,7 +106,7 @@ public class LoadBalanceHandler implements HttpHandler {
             byte[] buffer = new byte[connection.getContentLength()];
             is.readFully(buffer);
 
-            instance.completeRequest(request);
+            instance.processRequest(request);
             return buffer;
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,8 +120,11 @@ public class LoadBalanceHandler implements HttpHandler {
 
     private long estimateComplexity(Request request) {
         // TODO get all requests with the same thump and calc avg
+        /*
         long estimate = EstimationsStore.getStore().requestEstimation(request);
         Store.getStore().storeEstimate(request, estimate);
         return estimate;
+        */
+        return 0;
     }
 }

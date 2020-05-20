@@ -25,7 +25,7 @@ public class InstanceCreationhandler implements HttpHandler {
             }
         }
         InstanceProxy instance = new InstanceProxy(ip, id);
-        InstancesManager.getInstance().addInstance(instance);
+        InstancesManager.getSingleton().addInstance(instance);
         logger.info("added instance - " + instance.getAddress());
         String response = "Succeed";
         httpExchange.sendResponseHeaders(200, response.length());

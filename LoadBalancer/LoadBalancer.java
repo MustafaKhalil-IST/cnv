@@ -50,7 +50,7 @@ public class LoadBalancer  implements Runnable {
 
             estimator.run();
 
-            InstancesManager.getInstance().start();
+            InstancesManager.getSingleton().start();
 
             synchronized (this) {
                 try {
@@ -104,7 +104,7 @@ class Shutdown extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        InstancesManager.getInstance().shutDown();
+        InstancesManager.getSingleton().shutDown();
         LoadBalancer.shutdown();
         Runtime.getRuntime().exit(0);
     }

@@ -23,19 +23,19 @@ public class Monitor  extends TimerTask {
     public void run() {
         if (AutoScaler.loadReadings.size() >= minArraySize) {
             if (AutoScaler.loadReadings.size() >= maxArraySize) {
-                AutoScaler.loadReadings.set(position, InstancesManager.getInstance().getAverageLoad());
+                AutoScaler.loadReadings.set(position, InstancesManager.getSingleton().getAverageLoad());
             } else {
-                AutoScaler.loadReadings.add(InstancesManager.getInstance().getAverageLoad());
+                AutoScaler.loadReadings.add(InstancesManager.getSingleton().getAverageLoad());
             }
             if (AutoScaler.getUpscaleLoad() > AutoScaler.UPSCALE.loadPercentage) {
-                InstancesManager.getInstance().createInstance(InstanceProxy.MAX_LOAD);
+                InstancesManager.getSingleton().createInstance(InstanceProxy.MAX_LOAD);
                 AutoScaler.loadReadings = new ArrayList<>(0);
             } else if (AutoScaler.getDownScaleLoad() < AutoScaler.DOWNSCALE.loadPercentage) {
-                InstancesManager.getInstance().shutDownLaziestInstance();
+                InstancesManager.getSingleton().shutDownLaziestInstance();
                 AutoScaler.loadReadings = new ArrayList<>(0);
             }
         } else {
-            AutoScaler.loadReadings.add(InstancesManager.getInstance().getAverageLoad());
+            AutoScaler.loadReadings.add(InstancesManager.getSingleton().getAverageLoad());
         }
         position = (position + 1) % maxArraySize;
 

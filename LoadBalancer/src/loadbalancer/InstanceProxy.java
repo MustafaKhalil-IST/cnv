@@ -16,7 +16,7 @@ public class InstanceProxy {
     private final static Logger logger = Logger.getLogger(InstanceProxy.class.getName());
 
     public final static long MAX_LOAD = 100000L; //TODO
-    final static int STATUS_CHECK_INTERVAL = PropertiesReader.getInstance().getNumericalProperty("status.check.interval.ms");
+    final static int STATUS_CHECK_INTERVAL = PropertiesReader.getInstance().getNumericalProperty("status.check.interval");
     String address;
     String instanceID;
     Long currentLoad = 0L;
@@ -54,12 +54,13 @@ public class InstanceProxy {
         return currentLoad / MAX_LOAD * 100;
     }
 
-    public synchronized void completeRequest(Request request) {
+    public synchronized void processRequest(Request request) {
         long complexity = requestEstimatedComplexity.get(request.getRequestID());
         currentLoad -= complexity;
         requestEstimatedComplexity.remove(request.getRequestID());
         currentRequests.remove(request.getRequestID());
     }
+
     private synchronized void shutDown(AmazonEC2 client) {
         status = InstanceStatus.STOPPING;
         TerminateInstancesRequest termInstanceReq = new TerminateInstancesRequest();
@@ -67,28 +68,27 @@ public class InstanceProxy {
         client.terminateInstances(termInstanceReq);
     }
 
-    public static InstanceProxy requestNewWorker(AmazonEC2 client) {
+    public static InstanceProxy connectToAnInstance(AmazonEC2 client) {
         RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
         PropertiesReader reader = PropertiesReader.getInstance();
-        runInstancesRequest.withImageId(reader.getStringProperty("render.image.id"))
-                .withInstanceType(reader.getStringProperty("render.instance.type"))
+        runInstancesRequest.withImageId(reader.getStringProperty("image.id"))
+                .withInstanceType(reader.getStringProperty("instance.type"))
                 .withMinCount(1)
                 .withMaxCount(1)
-                .withKeyName(reader.getStringProperty("render.key.name"))
-                .withSecurityGroups(reader.getStringProperty("render.security.group"))
-                .withIamInstanceProfile(new IamInstanceProfileSpecification()
-                        .withName(reader.getStringProperty("render.iam.role.name")));
+                .withKeyName(reader.getStringProperty("key.name"))
+                .withSecurityGroups(reader.getStringProperty("security.group"));
 
         RunInstancesResult runInstancesResult = client.runInstances(runInstancesRequest);
         String newInstanceId = runInstancesResult.getReservation().getInstances()
                 .get(0).getInstanceId();
-        logger.info("made a new instance with ID " + newInstanceId);
+
+        logger.info("A new Instance has been connected: " + newInstanceId);
 
         return new InstanceProxy(newInstanceId);
     }
 
     public void setIP(String ip) {
-        address = ip + ":" + PropertiesReader.getInstance().getStringProperty("render.port");
+        address = ip + ":" + PropertiesReader.getInstance().getStringProperty("instance.port");
     }
 
     private DescribeInstancesResult describeInstance(AmazonEC2 client) {
@@ -159,7 +159,7 @@ public class InstanceProxy {
         public void run() {
             if (currentRequests.isEmpty()) {
                 instance.shutDown(client);
-                InstancesManager.getInstance().removeInstance(instance);
+                InstancesManager.getSingleton().removeInstance(instance);
                 this.cancel();
             }
         }

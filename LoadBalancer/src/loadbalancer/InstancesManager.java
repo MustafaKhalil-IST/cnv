@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 public class InstancesManager {
     private final static Logger logger = Logger.getLogger(InstancesManager.class.getName());
     static AmazonEC2 ec2 = null;
-    private static InstancesManager instance = new InstancesManager();
+    private static InstancesManager singleton = new InstancesManager();
     private List<InstanceProxy> instances = new ArrayList<InstanceProxy>();
 
     private InstancesManager(){
@@ -41,15 +41,35 @@ public class InstancesManager {
                 .withCredentials(credentialsProvider)
                 .build();
 
-        queryForWorkers();
+        DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
+        List<Reservation> reservations = describeInstancesRequest.getReservations();
+        PropertiesReader reader = PropertiesReader.getInstance();
+        for (Reservation reservation : reservations) {
+            for(Instance instance : reservation.getInstances()){
+                if (instance.getState().getName().equals(InstanceStateName.Running.toString()) &&
+                        instance.getImageId().equals(reader.getStringProperty("render.image.id")) &&
+                        instance.getInstanceType().equals(reader.getStringProperty("render.instance.type"))) {
+
+                    instances.add(new InstanceProxy(instance.getPublicIpAddress(), instance.getInstanceId()));
+
+                    logger.info("Adding " + instance.getInstanceId() + " " + instance.getState().getName() + " " +
+                            instance.getImageId() + " " +
+                            instance.getInstanceType() + " " +
+                            instance.getIamInstanceProfile().getArn());
+                }
+            }
+        }
+        if (instances.isEmpty()) {
+            addInstance(InstanceProxy.connectToAnInstance(ec2));
+        }
     }
 
     public void start() {
         init();
     }
 
-    public static synchronized InstancesManager getInstance(){
-        return instance;
+    public static synchronized InstancesManager getSingleton(){
+        return singleton;
     }
 
 
@@ -73,39 +93,13 @@ public class InstancesManager {
 
     public void createInstance(long complexity) {
         if (instances.size() < AutoScaler.UPSCALE.instances && complexity/InstanceProxy.MAX_LOAD > 0) {
-            addInstance(InstanceProxy.requestNewWorker(ec2));
+            addInstance(InstanceProxy.connectToAnInstance(ec2));
         }
     }
 
     // TODO
     public InstanceProxy getRandomInstance() {
         return instances.get(new Random().nextInt(instances.size()));
-    }
-
-
-    private void queryForWorkers() {
-        DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
-        List<Reservation> reservations = describeInstancesRequest.getReservations();
-        PropertiesReader reader = PropertiesReader.getInstance();
-        for (Reservation reservation : reservations) {
-            for(Instance instance : reservation.getInstances()){
-                if (instance.getState().getName().equals(InstanceStateName.Running.toString()) &&
-                        instance.getImageId().equals(reader.getStringProperty("render.image.id")) &&
-                        instance.getInstanceType().equals(reader.getStringProperty("render.instance.type")) &&
-                        instance.getIamInstanceProfile().getArn().equals(reader.getStringProperty("render.iam.role.arn"))) {
-
-                    instances.add(new InstanceProxy(instance.getPublicIpAddress(), instance.getInstanceId()));
-
-                    logger.info("Adding " + instance.getInstanceId() + " " + instance.getState().getName() + " " +
-                            instance.getImageId() + " " +
-                            instance.getInstanceType() + " " +
-                            instance.getIamInstanceProfile().getArn());
-                }
-            }
-        }
-        if (instances.isEmpty()) {
-            addInstance(InstanceProxy.requestNewWorker(ec2));
-        }
     }
 
     public void shutDown() {
