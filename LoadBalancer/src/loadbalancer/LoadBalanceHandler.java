@@ -9,9 +9,10 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import storage.dynamo.Request;
 
-import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -82,19 +83,23 @@ public class LoadBalanceHandler implements HttpHandler {
         Request request = getRequestFromQuery(t.getRequestURI().getQuery());
         queries.put(t, request);
         long complexity  = estimateComplexity(request);
-        byte[] buffer = redirectAndProcessRequestByWorker(request, complexity);
+        char[] buffer = redirectAndProcessRequestByWorker(request, complexity);
         if (buffer != null) {
             logger.info("The response is " + Arrays.toString(buffer));
             t.sendResponseHeaders(200, buffer.length);
-            OutputStream outputStream = t.getResponseBody();
-            outputStream.write(buffer);
-            outputStream.close();
+            OutputStream os = t.getResponseBody();
+            OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+            osw.write(Arrays.toString(buffer));
+            osw.flush();
+            osw.close();
+
+            os.close();
         } else {
             logger.warning("empty buffer");
         }
     }
 
-    private byte[] redirectAndProcessRequestByWorker(Request request, long complexity) {
+    private char[] redirectAndProcessRequestByWorker(Request request, long complexity) {
         HttpURLConnection connection = null;
         try {
             InstanceProxy instance = InstancesManager.getSingleton().getRandomInstance(); // TODO
@@ -107,9 +112,10 @@ public class LoadBalanceHandler implements HttpHandler {
             connection.setUseCaches(false);
             connection.setDoInput(true);
 
-            DataInputStream is = new DataInputStream((connection.getInputStream()));
-            byte[] buffer = new byte[connection.getContentLength()];
-            is.readFully(buffer);
+            InputStreamReader isr = new InputStreamReader(connection.getInputStream());
+            // DataInputStream is = new DataInputStream((connection.getInputStream()));
+            char[] buffer = new char[connection.getContentLength()];
+            isr.read(buffer, 0, connection.getContentLength());
 
             instance.processRequest(request);
             return buffer;
