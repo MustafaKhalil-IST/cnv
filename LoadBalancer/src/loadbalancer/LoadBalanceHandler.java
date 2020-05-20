@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -48,6 +49,7 @@ public class LoadBalanceHandler implements HttpHandler {
                 .withRegion(Regions.US_EAST_1)
                 .withCredentials(credentialsProvider)
                 .build();
+        logger.info("Load Balancer Handler is initialized");
     }
 
     private Request getRequestFromQuery(String query) {
@@ -76,17 +78,19 @@ public class LoadBalanceHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange t) throws IOException {
+        logger.info("A request " + t.getRequestURI().getQuery() + " has been received");
         Request request = getRequestFromQuery(t.getRequestURI().getQuery());
         queries.put(t, request);
         long complexity  = estimateComplexity(request);
         byte[] buffer = redirectAndProcessRequestByWorker(request, complexity);
         if (buffer != null) {
+            logger.info("The response is " + Arrays.toString(buffer));
             t.sendResponseHeaders(200, buffer.length);
             OutputStream outputStream = t.getResponseBody();
             outputStream.write(buffer);
             outputStream.close();
         } else {
-            System.out.println("empty buffer");
+            logger.warning("empty buffer");
         }
     }
 
@@ -96,6 +100,7 @@ public class LoadBalanceHandler implements HttpHandler {
             InstanceProxy instance = InstancesManager.getSingleton().getRandomInstance(); // TODO
             instance.addRequest(request, complexity);
 
+            logger.info("The request will be redirected to: " + instance.getAddress());
             URL url = new URL("http://" + instance.getAddress() + "/sudoku?" + request.getQuery());
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");

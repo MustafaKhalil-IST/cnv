@@ -105,7 +105,7 @@ public class InstanceProxy {
         }
         else if(state.getName().equals(InstanceStateName.Running.toString())){
             setIP(describeInstancesResult.getReservations().get(0).getInstances().get(0).getPublicIpAddress());
-            logger.info("Instance " + this.instanceID + " has started and has address" + this.address);
+            logger.info("Instance " + this.instanceID + " has started and has address " + this.address);
             this.status = InstanceStatus.STARTED;
             return true;
         }

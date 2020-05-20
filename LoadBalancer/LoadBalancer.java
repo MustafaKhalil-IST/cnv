@@ -4,6 +4,7 @@ import src.estimation.Estimator;
 import src.loadbalancer.InstanceCreationhandler;
 import src.loadbalancer.InstancesManager;
 import src.loadbalancer.LoadBalanceHandler;
+import src.properties.PropertiesReader;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,7 +14,7 @@ import java.util.logging.Logger;
 
 public class LoadBalancer  implements Runnable {
     private final static Logger logger = Logger.getLogger(LoadBalancer.class.getName());
-    private final static int PORT = 8001;
+    private final static int PORT = PropertiesReader.getInstance().getNumericalProperty("load-balance.port");
     private final static LoadBalancer balancer = new LoadBalancer();
     private LoadBalanceHandler loadBalanceHandler = new LoadBalanceHandler();
     private InstanceCreationhandler instanceCreationhandler = new InstanceCreationhandler();
