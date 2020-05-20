@@ -79,13 +79,10 @@ public class LoadBalanceHandler implements HttpHandler {
         InputStreamReader isr =  new InputStreamReader(is,"utf-8");
         BufferedReader br = new BufferedReader(isr);
 
-        // From now on, the right way of moving from bytes to utf-8 characters:
-
         int b;
         StringBuilder buf = new StringBuilder(512);
         while ((b = br.read()) != -1) {
             buf.append((char) b);
-
         }
 
         br.close();
@@ -117,7 +114,7 @@ public class LoadBalanceHandler implements HttpHandler {
 
             logger.info("headers are set");
 
-            t.sendResponseHeaders(200, buffer.length);
+            t.sendResponseHeaders(200, Arrays.toString(buffer).length());
 
             logger.info("response start to send");
 
@@ -132,7 +129,7 @@ public class LoadBalanceHandler implements HttpHandler {
             osw.write(Arrays.toString(buffer));
 
             logger.info("written");
-            // osw.flush();
+            osw.flush();
 
             logger.info("flush");
             osw.close();
