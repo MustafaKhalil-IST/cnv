@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 public class LoadBalancer  implements Runnable {
     private final static Logger logger = Logger.getLogger(LoadBalancer.class.getName());
-    private final static int PORT    = 8001;
+    private final static int PORT = 8001;
     private final static LoadBalancer balancer = new LoadBalancer();
     private LoadBalanceHandler loadBalanceHandler = new LoadBalanceHandler();
     private InstanceCreationhandler instanceCreationhandler = new InstanceCreationhandler();
@@ -69,8 +69,7 @@ public class LoadBalancer  implements Runnable {
     }
 
     public static void main(String[] args) {
-        LoadBalancer balancer = new LoadBalancer();
-        Thread serverThread = new Thread(balancer);
+        Thread serverThread = new Thread(new LoadBalancer());
         serverThread.start();
         Thread autoScalerThread = new Thread(new AutoScaler());
         autoScalerThread.start();

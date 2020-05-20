@@ -82,14 +82,14 @@ public class LoadBalanceHandler implements HttpHandler {
         Request request = getRequest(t.getRequestURI().getQuery());
         queries.put(t, request);
         long complexity  = estimateComplexity(request);
-        byte[] buffer = sendRequest(request, complexity);
+        byte[] buffer = redirectRequest(request, complexity);
         t.sendResponseHeaders(200, buffer.length);
         OutputStream outputStream = t.getResponseBody();
         outputStream.write(buffer);
         outputStream.close();
     }
 
-    private byte[] sendRequest(Request request, long complexity) {
+    private byte[] redirectRequest(Request request, long complexity) {
         HttpURLConnection connection = null;
         try {
             InstanceProxy instance = InstancesManager.getInstance().getRandomInstance(); // TODO
@@ -118,6 +118,7 @@ public class LoadBalanceHandler implements HttpHandler {
     }
 
     private long estimateComplexity(Request request) {
+        // TODO get all requests with the same thump and calc avg
         long estimate = EstimationsStore.getStore().requestEstimation(request);
         Store.getStore().storeEstimate(request, estimate);
         return estimate;
