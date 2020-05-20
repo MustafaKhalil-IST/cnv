@@ -147,12 +147,14 @@ public class LoadBalanceHandler implements HttpHandler {
                 connection.setRequestProperty("Content-Length", Integer.toString(body.length()));
                 connection.getOutputStream().write(body.getBytes("UTF8"));
             }
-            
+
             char[] buffer = new char[connection.getContentLength()];
 
             InputStream is = connection.getInputStream();
             InputStreamReader isr = new InputStreamReader(is);
             isr.read(buffer, 0, connection.getContentLength());
+            isr.close();
+            is.close();
 
             /*
             DataInputStream is = new DataInputStream((connection.getInputStream()));
