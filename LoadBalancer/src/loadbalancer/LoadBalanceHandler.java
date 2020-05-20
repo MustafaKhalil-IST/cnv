@@ -100,8 +100,8 @@ public class LoadBalanceHandler implements HttpHandler {
             InstanceProxy instance = InstancesManager.getSingleton().getRandomInstance(); // TODO
             instance.addRequest(request, complexity);
 
-            logger.info("The request will be redirected to: " + instance.getAddress());
             URL url = new URL("http://" + instance.getAddress() + "/sudoku?" + request.getQuery());
+            logger.info("The request will be redirected to: " + "http://" + instance.getAddress() + "/sudoku?" + request.getQuery());
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setUseCaches(false);
