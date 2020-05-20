@@ -119,6 +119,8 @@ public class LoadBalanceHandler implements HttpHandler {
 
             t.sendResponseHeaders(200, buffer.length);
 
+            logger.info("response start to send");
+
             final OutputStream os = t.getResponseBody();
             OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
             osw.write(Arrays.toString(buffer));
