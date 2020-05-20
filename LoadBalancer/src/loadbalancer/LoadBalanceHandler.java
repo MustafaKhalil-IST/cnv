@@ -123,6 +123,7 @@ public class LoadBalanceHandler implements HttpHandler {
             connection = (HttpURLConnection) url.openConnection();
             connection.setUseCaches(false);
             connection.setDoInput(true);
+            connection.setDoOutput(true);
             connection.addRequestProperty("Content-Type", "application/" + "POST");
             if (body != null) {
                 connection.setRequestProperty("Content-Length", Integer.toString(body.length()));
