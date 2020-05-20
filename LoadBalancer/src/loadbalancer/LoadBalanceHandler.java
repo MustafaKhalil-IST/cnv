@@ -115,6 +115,8 @@ public class LoadBalanceHandler implements HttpHandler {
             hdrs.add("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS");
             hdrs.add("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
 
+            logger.info("headers are set");
+
             t.sendResponseHeaders(200, buffer.length);
 
             final OutputStream os = t.getResponseBody();
@@ -124,6 +126,8 @@ public class LoadBalanceHandler implements HttpHandler {
             osw.close();
 
             os.close();
+
+            logger.info("response is written");
 
             logger.info("> Sent response to " + t.getRemoteAddress().toString());
 
