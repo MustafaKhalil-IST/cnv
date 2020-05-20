@@ -98,7 +98,7 @@ public class LoadBalanceHandler implements HttpHandler {
         String body = parseRequestBody(t.getRequestBody());
         queries.put(t, request);
         long complexity  = estimateComplexity(request);
-        byte[] buffer = redirectAndProcessRequestByWorker(request, complexity, body);
+        char[] buffer = redirectAndProcessRequestByWorker(request, complexity, body);
         if (buffer != null) {
             String response = Arrays.toString(buffer);
             logger.info("The response is " + response);
@@ -130,7 +130,7 @@ public class LoadBalanceHandler implements HttpHandler {
         }
     }
 
-    private byte[] redirectAndProcessRequestByWorker(Request request, long complexity, String body) {
+    private char[] redirectAndProcessRequestByWorker(Request request, long complexity, String body) {
         HttpURLConnection connection = null;
         try {
             InstanceProxy instance = InstancesManager.getSingleton().getRandomInstance(); // TODO
@@ -147,11 +147,18 @@ public class LoadBalanceHandler implements HttpHandler {
                 connection.setRequestProperty("Content-Length", Integer.toString(body.length()));
                 connection.getOutputStream().write(body.getBytes("UTF8"));
             }
+            
+            char[] buffer = new char[connection.getContentLength()];
 
+            InputStream is = connection.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            isr.read(buffer, 0, connection.getContentLength());
 
+            /*
             DataInputStream is = new DataInputStream((connection.getInputStream()));
             byte[] buffer = new byte[connection.getContentLength()];
             is.readFully(buffer);
+             */
 
             instance.processRequest(request);
             return buffer;
