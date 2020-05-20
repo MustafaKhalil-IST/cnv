@@ -132,7 +132,7 @@ public class LoadBalanceHandler implements HttpHandler {
             osw.write(Arrays.toString(buffer));
 
             logger.info("written");
-            osw.flush();
+            // osw.flush();
 
             logger.info("flush");
             osw.close();
