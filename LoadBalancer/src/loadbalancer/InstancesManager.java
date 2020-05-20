@@ -108,7 +108,7 @@ public class InstancesManager {
         }
     }
 
-    public void shutDownLaziestInstance() {
+    public void shutDownInstanceWithLeastLoad() {
         if (instances.size() == AutoScaler.DECREASE.getNumberOfWorkers()) {
             return;
         }

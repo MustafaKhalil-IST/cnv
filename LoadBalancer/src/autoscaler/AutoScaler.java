@@ -24,14 +24,6 @@ public class AutoScaler implements Runnable{
         monitor.schedule(new AutoScaleTask(period / 1000), period, period);
     }
 
-    public static Double getTotalLoad() {
-        double totalLoad = 0;
-        for (Double reading: loadReadings) {
-            totalLoad += reading;
-        }
-        return totalLoad;
-    }
-
     public static Double getIncreasedLoad() {
         double totalLoad = 0;
         int upscaleEntries = INCREASE.getPeriodToAct() / period;

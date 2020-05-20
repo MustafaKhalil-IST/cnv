@@ -8,6 +8,7 @@ import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import src.estimation.EstimationsCalculator;
 import storage.dynamo.Request;
 
 import java.io.*;
@@ -20,13 +21,7 @@ import java.util.logging.Logger;
 
 public class LoadBalanceHandler implements HttpHandler {
     private static Logger logger = Logger.getLogger(LoadBalanceHandler.class.getName());
-    private static HashMap<HttpExchange , Request> queries = new HashMap<>();
-    public static ArrayList<String> instanceIP = new ArrayList<String>();
-    private static ArrayList<String> instanceIds = new ArrayList<String>();
-    private static HashMap<String, Long> currentComplexity = new HashMap<>();
-
     static AmazonEC2 ec2;
-
 
     public LoadBalanceHandler(){
         super();
@@ -34,7 +29,6 @@ public class LoadBalanceHandler implements HttpHandler {
     }
 
     private void init(){
-        // instanceIP.add("localhost");
         AWSCredentialsProviderChain credentialsProvider;
         try {
             credentialsProvider = new DefaultAWSCredentialsProviderChain();
@@ -95,9 +89,8 @@ public class LoadBalanceHandler implements HttpHandler {
         logger.info("A request " + t.getRequestURI().getQuery() + " has been received");
         Request request = getRequestFromQuery(t.getRequestURI().getQuery());
         String body = parseRequestBody(t.getRequestBody());
-        queries.put(t, request);
-        long complexity  = estimateComplexity(request);
-        String buffer = redirectAndProcessRequestByWorker(request, complexity, body);
+        long cost  = estimateRequestCost(request);
+        String buffer = redirectAndProcessRequestByWorker(request, cost, body);
         if (buffer != null) {
             logger.info("The response is " + buffer);
 
@@ -128,11 +121,11 @@ public class LoadBalanceHandler implements HttpHandler {
         }
     }
 
-    private String redirectAndProcessRequestByWorker(Request request, long complexity, String body) {
+    private String redirectAndProcessRequestByWorker(Request request, long cost, String body) {
         HttpURLConnection connection = null;
         try {
             InstanceProxy instance = InstancesManager.getSingleton().getRandomInstance(); // TODO
-            instance.addRequest(request, complexity);
+            instance.addRequest(request, cost);
 
             logger.info("The request will be redirected to: " + instance.getAddress());
             URL url = new URL("http://" + instance.getAddress() + "/sudoku?" + request.getQuery());
@@ -164,13 +157,7 @@ public class LoadBalanceHandler implements HttpHandler {
         }
     }
 
-    private long estimateComplexity(Request request) {
-        // TODO get all requests with the same thump and calc avg
-        /*
-        long estimate = EstimationsStore.getStore().requestEstimation(request);
-        Store.getStore().storeEstimate(request, estimate);
-        return estimate;
-        */
-        return 0;
+    private long estimateRequestCost(Request request) {
+        return EstimationsCalculator.getInstance().calculateEstimatedCost(request);
     }
 }

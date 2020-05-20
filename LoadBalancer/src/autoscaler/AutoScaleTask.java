@@ -28,7 +28,7 @@ public class AutoScaleTask extends TimerTask {
                 InstancesManager.getSingleton().createInstance(InstanceProxy.MAX_LOAD);
                 AutoScaler.loadReadings = new ArrayList<>(0);
             } else if (AutoScaler.getDecreasedLoad() < AutoScaler.DECREASE.getLoadPercentageToAct()) {
-                InstancesManager.getSingleton().shutDownLaziestInstance();
+                InstancesManager.getSingleton().shutDownInstanceWithLeastLoad();
                 AutoScaler.loadReadings = new ArrayList<>(0);
             }
         } else {

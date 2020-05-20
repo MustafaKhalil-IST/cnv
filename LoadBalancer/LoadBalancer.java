@@ -1,7 +1,5 @@
 import src.autoscaler.AutoScaler;
 import com.sun.net.httpserver.HttpServer;
-import src.estimation.Estimator;
-import src.loadbalancer.InstanceCreationhandler;
 import src.loadbalancer.InstancesManager;
 import src.loadbalancer.LoadBalanceHandler;
 import src.properties.PropertiesReader;
@@ -17,7 +15,6 @@ public class LoadBalancer  implements Runnable {
     private final static int PORT = PropertiesReader.getInstance().getNumericalProperty("load-balance.port");
     private final static LoadBalancer balancer = new LoadBalancer();
     private LoadBalanceHandler loadBalanceHandler = new LoadBalanceHandler();
-    private InstanceCreationhandler instanceCreationhandler = new InstanceCreationhandler();
     private HttpServer httpServer;
 
     static void shutdown() {
@@ -43,7 +40,6 @@ public class LoadBalancer  implements Runnable {
             ExecutorService executor = Executors.newCachedThreadPool();
             httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
             httpServer.createContext("/sudoku", loadBalanceHandler);
-            httpServer.createContext("/instances", instanceCreationhandler);
 
             httpServer.setExecutor(executor);
             httpServer.start();

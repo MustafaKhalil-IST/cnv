@@ -44,10 +44,11 @@ public class InstanceProxy {
         checkStatus.schedule(new StartUpStatusTask(InstancesManager.ec2, this), STATUS_CHECK_INTERVAL, STATUS_CHECK_INTERVAL);
     }
 
-    public synchronized void addRequest(Request request, long estimatedComplexity) {
-        currentLoad += estimatedComplexity;
-        estimatedRequestsLoads.put(request.getRequestID(), estimatedComplexity);
+    public synchronized void addRequest(Request request, long estimatedCost) {
+        currentLoad += estimatedCost;
+        estimatedRequestsLoads.put(request.getRequestID(), estimatedCost);
         currentRequests.put(request.getRequestID(), request);
+        logger.info("Instance " + getAddress() + " current load is " + currentLoad);
     }
 
     public Long getLoadPercentage() {
@@ -105,7 +106,7 @@ public class InstanceProxy {
         }
         else if(state.getName().equals(InstanceStateName.Running.toString())){
             setIP(describeInstancesResult.getReservations().get(0).getInstances().get(0).getPublicIpAddress());
-            logger.info("Instance " + this.instanceID + " has started and has address " + this.address);
+            logger.info("Instance " + this.instanceID + " has started with the address " + this.address);
             this.status = InstanceStatus.STARTED;
             return true;
         }
