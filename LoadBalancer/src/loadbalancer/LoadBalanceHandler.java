@@ -98,10 +98,9 @@ public class LoadBalanceHandler implements HttpHandler {
         String body = parseRequestBody(t.getRequestBody());
         queries.put(t, request);
         long complexity  = estimateComplexity(request);
-        char[] buffer = redirectAndProcessRequestByWorker(request, complexity, body);
+        String buffer = redirectAndProcessRequestByWorker(request, complexity, body);
         if (buffer != null) {
-            String response = Arrays.toString(buffer);
-            logger.info("The response is " + response);
+            logger.info("The response is " + buffer);
 
             final Headers hdrs = t.getResponseHeaders();
 
@@ -113,12 +112,12 @@ public class LoadBalanceHandler implements HttpHandler {
             hdrs.add("Access-Control-Allow-Methods", "POST, GET, HEAD, OPTIONS");
             hdrs.add("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
 
-            t.sendResponseHeaders(200, response.length());
+            t.sendResponseHeaders(200, buffer.length());
 
             final OutputStream os = t.getResponseBody();
             OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
 
-            osw.write(Arrays.toString(buffer));
+            osw.write(buffer);
             osw.flush();
             osw.close();
             os.close();
@@ -130,7 +129,7 @@ public class LoadBalanceHandler implements HttpHandler {
         }
     }
 
-    private char[] redirectAndProcessRequestByWorker(Request request, long complexity, String body) {
+    private String redirectAndProcessRequestByWorker(Request request, long complexity, String body) {
         HttpURLConnection connection = null;
         try {
             InstanceProxy instance = InstancesManager.getSingleton().getRandomInstance(); // TODO
@@ -148,14 +147,13 @@ public class LoadBalanceHandler implements HttpHandler {
                 connection.getOutputStream().write(body.getBytes("UTF8"));
             }
 
-            char[] buffer = new char[connection.getContentLength()];
+            // char[] buffer = new char[connection.getContentLength()];
 
             InputStream is = connection.getInputStream();
             InputStreamReader isr = new InputStreamReader(is);
-            isr.read(buffer, 0, connection.getContentLength());
-            isr.close();
-            is.close();
-
+            BufferedReader in = new BufferedReader(isr);
+            String buffer = in.readLine();
+            in.close();
             /*
             DataInputStream is = new DataInputStream((connection.getInputStream()));
             byte[] buffer = new byte[connection.getContentLength()];
