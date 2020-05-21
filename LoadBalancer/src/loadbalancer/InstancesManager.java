@@ -125,14 +125,7 @@ public class InstancesManager {
             return;
         }
         Collections.sort(instances, InstanceProxy.LOAD_COMPARATOR);
-        int index = 0;
-        while (!instances.get(index).status.equals(InstanceStatus.ACTIVE)) {
-            index++;
-            if (index == instances.size()) {
-                break;
-            }
-        }
-        InstanceProxy instance = instances.get(index);
+        InstanceProxy instance = instances.get(instances.size() - 1);
         instance.startShutDown();
     }
 
