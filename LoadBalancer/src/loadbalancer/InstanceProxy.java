@@ -33,7 +33,7 @@ public class InstanceProxy {
     };
 
     public InstanceProxy(String ip, String instanceID) {
-        setIP(ip);
+        updateAddress(ip);
         this.instanceID = instanceID;
         status = InstanceStatus.ACTIVE;
     }
@@ -86,11 +86,13 @@ public class InstanceProxy {
 
         logger.info("A new Instance has been connected: " + newInstanceId);
 
-        return new InstanceProxy(newInstanceId);
+        InstanceProxy instance = new InstanceProxy(newInstanceId);
+        instance.status = InstanceStatus.STARTING;
+        return instance;
     }
 
-    public void setIP(String ip) {
-        address = ip + ":" + PropertiesReader.getInstance().getProperty("instance.port");
+    public void updateAddress(String newAddress) {
+        address = newAddress + ":" + PropertiesReader.getInstance().getProperty("instance.port");
     }
 
     private DescribeInstancesResult describeInstance(AmazonEC2 client) {
@@ -106,7 +108,7 @@ public class InstanceProxy {
             return false;
         }
         else if(state.getName().equals(InstanceStateName.Running.toString())){
-            setIP(describeInstancesResult.getReservations().get(0).getInstances().get(0).getPublicIpAddress());
+            updateAddress(describeInstancesResult.getReservations().get(0).getInstances().get(0).getPublicIpAddress());
             logger.info("Instance " + this.instanceID + " has started with the address " + this.address);
             this.status = InstanceStatus.STARTED;
             return true;
