@@ -94,11 +94,12 @@ public class InstancesManager {
 
     public void createInstance() {
         if (instances.size() < AutoScaler.INCREASE.getNumberOfWorkers()) {
+            logger.info("Creating a new Instance");
             addInstance(InstanceProxy.connectToAnInstance(ec2));
         }
     }
 
-    public InstanceProxy getRandomInstance() {
+    private InstanceProxy getRandomInstance() {
         return instances.get(new Random().nextInt(instances.size()));
     }
 
@@ -108,7 +109,7 @@ public class InstancesManager {
                 return instance;
             }
         }
-        return instances.get(new Random().nextInt(instances.size()));
+        return getRandomInstance();
     }
 
     public void shutDown() {
