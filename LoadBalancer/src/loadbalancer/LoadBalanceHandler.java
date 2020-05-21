@@ -125,10 +125,11 @@ public class LoadBalanceHandler implements HttpHandler {
     private String redirectAndProcessRequestByWorker(Request request, long cost, String body) {
         HttpURLConnection connection = null;
         try {
-            InstanceProxy instance = null;
+            InstanceProxy instance = InstancesManager.getSingleton().getBestInstance(cost);;
             while (instance == null) {
-                instance = InstancesManager.getSingleton().getBestInstance(cost);
+                logger.warning("There is no ready instance to execute the request " + request.getQuery() + "- Waiting ... ");
                 Thread.sleep(1000);
+                instance = InstancesManager.getSingleton().getBestInstance(cost);
             }
 
             instance.addRequest(request, cost);
