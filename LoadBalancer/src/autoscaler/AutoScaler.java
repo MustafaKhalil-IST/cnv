@@ -1,5 +1,7 @@
 package src.autoscaler;
 
+import src.loadbalancer.InstanceProxy;
+import src.loadbalancer.InstancesManager;
 import src.properties.PropertiesReader;
 
 import java.util.ArrayList;
@@ -17,30 +19,32 @@ public class AutoScaler implements Runnable{
             Integer.parseInt(reader.getProperty("auto-scale.decrease.load.for.more.than")),
             Integer.parseInt(reader.getProperty("auto-scale.decrease.min.instances")));
     static ArrayList<Double> loadReadings = new ArrayList<>();
-    static final int period = 5000;
+    static final int period = Integer.parseInt(reader.getProperty("auto-scale.check.period"));
 
     @Override
     public void run() {
-        monitor.schedule(new AutoScaleTask(period / 1000), period, period);
+        monitor.schedule(new AutoScaleTask(), period, period);
     }
 
-    public static Double getOverLoad() {
-        double totalLoad = 0;
-        int upscaleEntries = INCREASE.getPeriodToAct() / period;
-        for(int i = upscaleEntries + 1; i < loadReadings.size(); i++) {
-            totalLoad += loadReadings.get(i);
+    public static Integer getNumberOfOverloadedWorkers() {
+        Integer count = 0;
+        for(InstanceProxy instance: InstancesManager.getSingleton().getInstances()) {
+            if (instance.getLoadPercentage() > 1) {
+                count ++;
+            }
         }
-        return totalLoad;
+        return count;
     }
 
 
-    public static Double getDownLoad() {
-        double totalLoad = 0;
-        int downScaleEntries = DECREASE.getPeriodToAct() / period;
-        for(int i = downScaleEntries + 1; i < loadReadings.size(); i++) {
-            totalLoad += loadReadings.get(i);
+    public static Integer getNumberOfDownloadedWorkers() {
+        Integer count = 0;
+        for(InstanceProxy instance: InstancesManager.getSingleton().getInstances()) {
+            if (instance.getLoadPercentage() < 0.4) {
+                count ++;
+            }
         }
-        return totalLoad;
+        return count;
     }
 
 }

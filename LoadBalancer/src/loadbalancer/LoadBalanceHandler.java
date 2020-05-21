@@ -124,7 +124,7 @@ public class LoadBalanceHandler implements HttpHandler {
     private String redirectAndProcessRequestByWorker(Request request, long cost, String body) {
         HttpURLConnection connection = null;
         try {
-            InstanceProxy instance = InstancesManager.getSingleton().getRandomInstance(); // TODO
+            InstanceProxy instance = InstancesManager.getSingleton().getBestInstance(cost);
             instance.addRequest(request, cost);
 
             logger.info("The request will be redirected to: " + instance.getAddress());

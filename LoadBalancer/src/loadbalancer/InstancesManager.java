@@ -70,6 +70,9 @@ public class InstancesManager {
         return singleton;
     }
 
+    public List<InstanceProxy> getInstances() {
+        return instances;
+    }
 
     public void addInstance(InstanceProxy instance) {
         instances.add(instance);
@@ -89,14 +92,22 @@ public class InstancesManager {
         return totalLoad / nrInstances;
     }
 
-    public void createInstance(long cost) {
-        if (instances.size() < AutoScaler.INCREASE.getNumberOfWorkers() && cost/InstanceProxy.MAX_LOAD > 0) {
+    public void createInstance() {
+        if (instances.size() < AutoScaler.INCREASE.getNumberOfWorkers()) {
             addInstance(InstanceProxy.connectToAnInstance(ec2));
         }
     }
 
-    // TODO
     public InstanceProxy getRandomInstance() {
+        return instances.get(new Random().nextInt(instances.size()));
+    }
+
+    public InstanceProxy getBestInstance(long cost) {
+        for (InstanceProxy instance: instances) {
+            if (instance.currentLoad  + cost < InstanceProxy.MAX_LOAD) {
+                return instance;
+            }
+        }
         return instances.get(new Random().nextInt(instances.size()));
     }
 
