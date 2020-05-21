@@ -18,7 +18,6 @@ public class AutoScaler implements Runnable{
             Integer.parseInt(reader.getProperty("auto-scale.decrease.load")),
             Integer.parseInt(reader.getProperty("auto-scale.decrease.load.for.more.than")),
             Integer.parseInt(reader.getProperty("auto-scale.decrease.min.instances")));
-    static ArrayList<Double> loadReadings = new ArrayList<>();
     static final int period = Integer.parseInt(reader.getProperty("auto-scale.check.period"));
 
     @Override
