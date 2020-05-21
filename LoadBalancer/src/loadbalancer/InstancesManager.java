@@ -23,6 +23,7 @@ public class InstancesManager {
     static AmazonEC2 ec2 = null;
     private static InstancesManager singleton = new InstancesManager();
     private List<InstanceProxy> instances = new ArrayList<InstanceProxy>();
+    final Integer TOLERANCE = 500;
 
     private InstancesManager(){
     }
@@ -101,7 +102,7 @@ public class InstancesManager {
 
     public InstanceProxy getBestInstance(long cost) {
         for (InstanceProxy instance: instances) {
-            if (instance.currentLoad + cost < InstanceProxy.MAX_LOAD && instance.status.equals(InstanceStatus.STARTED)) {
+            if (instance.currentLoad + cost < InstanceProxy.MAX_LOAD + TOLERANCE && instance.status.equals(InstanceStatus.STARTED)) {
                 return instance;
             }
         }
