@@ -44,6 +44,10 @@ public class InstanceProxy {
         checkStatus.schedule(new StartUpStatusTask(InstancesManager.ec2, this), STATUS_CHECK_INTERVAL, STATUS_CHECK_INTERVAL);
     }
 
+    public InstanceStatus getStatus(){
+        return status;
+    }
+
     public synchronized void addRequest(Request request, long estimatedCost) {
         currentLoad += estimatedCost;
         estimatedRequestsLoads.put(request.getRequestID(), estimatedCost);
@@ -86,9 +90,7 @@ public class InstanceProxy {
 
         logger.info("A new Instance has been connected: " + newInstanceId);
 
-        InstanceProxy instance = new InstanceProxy(newInstanceId);
-        instance.status = InstanceStatus.STARTING;
-        return instance;
+        return new InstanceProxy(newInstanceId);
     }
 
     public void updateAddress(String newAddress) {
