@@ -47,8 +47,8 @@ public class InstancesManager {
         for (Reservation reservation : reservations) {
             for(Instance instance : reservation.getInstances()){
                 if (instance.getState().getName().equals(InstanceStateName.Running.toString()) &&
-                        instance.getImageId().equals(reader.getStringProperty("image.id")) &&
-                        instance.getInstanceType().equals(reader.getStringProperty("instance.type"))) {
+                        instance.getImageId().equals(reader.getProperty("image.id")) &&
+                        instance.getInstanceType().equals(reader.getProperty("instance.type"))) {
 
                     instances.add(new InstanceProxy(instance.getPublicIpAddress(), instance.getInstanceId()));
 
@@ -89,8 +89,8 @@ public class InstancesManager {
         return totalLoad / nrInstances;
     }
 
-    public void createInstance(long complexity) {
-        if (instances.size() < AutoScaler.INCREASE.getNumberOfWorkers() && complexity/InstanceProxy.MAX_LOAD > 0) {
+    public void createInstance(long cost) {
+        if (instances.size() < AutoScaler.INCREASE.getNumberOfWorkers() && cost/InstanceProxy.MAX_LOAD > 0) {
             addInstance(InstanceProxy.connectToAnInstance(ec2));
         }
     }

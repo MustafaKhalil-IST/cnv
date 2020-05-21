@@ -12,27 +12,10 @@ import java.util.logging.Logger;
 
 public class LoadBalancer  implements Runnable {
     private final static Logger logger = Logger.getLogger(LoadBalancer.class.getName());
-    private final static int PORT = PropertiesReader.getInstance().getNumericalProperty("load-balance.port");
+    private final static int PORT = Integer.parseInt(PropertiesReader.getInstance().getProperty("load-balance.port"));
     private final static LoadBalancer balancer = new LoadBalancer();
     private LoadBalanceHandler loadBalanceHandler = new LoadBalanceHandler();
     private HttpServer httpServer;
-
-    static void shutdown() {
-        try {
-            logger.info("Shutting down the LoadBalancer!");
-            balancer.httpServer.stop(0);
-        } catch (Exception e) {
-            logger.warning("There was an exception when shutting down the server, check the stacktrace");
-            logger.warning(e.getMessage());
-            e.printStackTrace();
-        } finally {
-            logger.info("Server shut down!");
-        }
-
-        synchronized (balancer) {
-            balancer.notifyAll();
-        }
-    }
 
     @Override
     public void run() {
@@ -59,6 +42,23 @@ public class LoadBalancer  implements Runnable {
             logger.warning("There was an exception handling, check the stacktrace for more errors.");
             logger.warning(t.getMessage());
             t.printStackTrace();
+        }
+    }
+
+    static void shutdown() {
+        try {
+            logger.info("Shutting down the LoadBalancer!");
+            balancer.httpServer.stop(0);
+        } catch (Exception e) {
+            logger.warning("There was an exception when shutting down the server, check the stacktrace");
+            logger.warning(e.getMessage());
+            e.printStackTrace();
+        } finally {
+            logger.info("Server shut down!");
+        }
+
+        synchronized (balancer) {
+            balancer.notifyAll();
         }
     }
 

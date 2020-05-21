@@ -24,10 +24,10 @@ public class AutoScaleTask extends TimerTask {
             } else {
                 AutoScaler.loadReadings.add(InstancesManager.getSingleton().getAverageLoad());
             }
-            if (AutoScaler.getIncreasedLoad() > AutoScaler.INCREASE.getLoadPercentageToAct()) {
+            if (AutoScaler.getOverLoad() > AutoScaler.INCREASE.getLoadPercentageToAct()) {
                 InstancesManager.getSingleton().createInstance(InstanceProxy.MAX_LOAD);
                 AutoScaler.loadReadings = new ArrayList<>(0);
-            } else if (AutoScaler.getDecreasedLoad() < AutoScaler.DECREASE.getLoadPercentageToAct()) {
+            } else if (AutoScaler.getDownLoad() < AutoScaler.DECREASE.getLoadPercentageToAct()) {
                 InstancesManager.getSingleton().shutDownInstanceWithLeastLoad();
                 AutoScaler.loadReadings = new ArrayList<>(0);
             }

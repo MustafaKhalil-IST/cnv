@@ -15,8 +15,8 @@ public class InstanceProxy {
 
     private final static Logger logger = Logger.getLogger(InstanceProxy.class.getName());
 
-    public final static long MAX_LOAD = 10000L; //TODO
-    final static int STATUS_CHECK_INTERVAL = PropertiesReader.getInstance().getNumericalProperty("status.check.interval");
+    public final static long MAX_LOAD = Integer.parseInt(PropertiesReader.getInstance().getProperty("instance.max-load"));
+    final static int STATUS_CHECK_INTERVAL = Integer.parseInt(PropertiesReader.getInstance().getProperty("status.check.interval"));
     String address;
     String instanceID;
     Long currentLoad = 0L;
@@ -72,12 +72,12 @@ public class InstanceProxy {
     public static InstanceProxy connectToAnInstance(AmazonEC2 client) {
         RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
         PropertiesReader reader = PropertiesReader.getInstance();
-        runInstancesRequest.withImageId(reader.getStringProperty("image.id"))
-                .withInstanceType(reader.getStringProperty("instance.type"))
+        runInstancesRequest.withImageId(reader.getProperty("image.id"))
+                .withInstanceType(reader.getProperty("instance.type"))
                 .withMinCount(1)
                 .withMaxCount(1)
-                .withKeyName(reader.getStringProperty("key.name"))
-                .withSecurityGroups(reader.getStringProperty("security.group"));
+                .withKeyName(reader.getProperty("key.name"))
+                .withSecurityGroups(reader.getProperty("security.group"));
 
         RunInstancesResult runInstancesResult = client.runInstances(runInstancesRequest);
         String newInstanceId = runInstancesResult.getReservation().getInstances()
@@ -89,7 +89,7 @@ public class InstanceProxy {
     }
 
     public void setIP(String ip) {
-        address = ip + ":" + PropertiesReader.getInstance().getStringProperty("instance.port");
+        address = ip + ":" + PropertiesReader.getInstance().getProperty("instance.port");
     }
 
     private DescribeInstancesResult describeInstance(AmazonEC2 client) {
@@ -122,7 +122,6 @@ public class InstanceProxy {
     public synchronized void startShutDown() {
         this.status = InstanceStatus.STOPPED;
         this.checkStatus.schedule(new ShutDownStatusTask(InstancesManager.ec2, this), STATUS_CHECK_INTERVAL, STATUS_CHECK_INTERVAL);
-
     }
 
     class StartUpStatusTask extends TimerTask {
