@@ -99,17 +99,15 @@ public class InstancesManager {
         }
     }
 
-    private InstanceProxy getRandomInstance() {
-        return instances.get(new Random().nextInt(instances.size()));
-    }
-
     public InstanceProxy getBestInstance(long cost) {
         for (InstanceProxy instance: instances) {
-            if (instance.currentLoad  + cost < InstanceProxy.MAX_LOAD && instance.status.equals(InstanceStatus.ACTIVE)) {
+            if (instance.currentLoad  + cost < InstanceProxy.MAX_LOAD &&
+                    instance.status.equals(InstanceStatus.ACTIVE) &&
+                    instance.getAddress() != null) {
                 return instance;
             }
         }
-        return getRandomInstance();
+        return null;
     }
 
     public void shutDown() {

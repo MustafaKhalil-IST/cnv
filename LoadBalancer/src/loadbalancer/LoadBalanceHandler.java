@@ -14,6 +14,7 @@ import storage.dynamo.Request;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -69,7 +70,7 @@ public class LoadBalanceHandler implements HttpHandler {
     }
 
     private static String parseRequestBody(InputStream is) throws IOException {
-        InputStreamReader isr =  new InputStreamReader(is,"utf-8");
+        InputStreamReader isr =  new InputStreamReader(is, StandardCharsets.UTF_8);
         BufferedReader br = new BufferedReader(isr);
 
         int b;
@@ -107,7 +108,7 @@ public class LoadBalanceHandler implements HttpHandler {
             t.sendResponseHeaders(200, buffer.length());
 
             final OutputStream os = t.getResponseBody();
-            OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+            OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
 
             osw.write(buffer);
             osw.flush();
@@ -124,7 +125,12 @@ public class LoadBalanceHandler implements HttpHandler {
     private String redirectAndProcessRequestByWorker(Request request, long cost, String body) {
         HttpURLConnection connection = null;
         try {
-            InstanceProxy instance = InstancesManager.getSingleton().getBestInstance(cost);
+            InstanceProxy instance = null;
+            while (instance == null) {
+                instance = InstancesManager.getSingleton().getBestInstance(cost);
+                Thread.sleep(1000);
+            }
+
             instance.addRequest(request, cost);
 
             logger.info("The request will be redirected to: " + instance.getAddress());
@@ -136,7 +142,7 @@ public class LoadBalanceHandler implements HttpHandler {
             connection.addRequestProperty("Content-Type", "application/" + "POST");
             if (body != null) {
                 connection.setRequestProperty("Content-Length", Integer.toString(body.length()));
-                connection.getOutputStream().write(body.getBytes("UTF8"));
+                connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
             }
 
             InputStream is = connection.getInputStream();

@@ -5,6 +5,8 @@ import src.loadbalancer.InstancesManager;
 import src.properties.PropertiesReader;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 
 public class AutoScaler implements Runnable{
@@ -19,10 +21,24 @@ public class AutoScaler implements Runnable{
             Integer.parseInt(reader.getProperty("auto-scale.decrease.load.for.more.than")),
             Integer.parseInt(reader.getProperty("auto-scale.decrease.min.instances")));
     static final int period = Integer.parseInt(reader.getProperty("auto-scale.check.period"));
+    Map<String, Integer> downloadedInstances = new HashMap<>();
 
     @Override
     public void run() {
         monitor.schedule(new AutoScaleTask(), period, period);
+    }
+
+    public void updateDownloadedInstances() {
+        for(InstanceProxy instance: InstancesManager.getSingleton().getInstances()) {
+            if (instance.getLoadPercentage() < 0.4) {
+                if (downloadedInstances.containsKey(instance.getAddress())) {
+                    downloadedInstances.put(instance.getAddress(), downloadedInstances.get(instance.getAddress()) + 1);
+                }
+                else {
+                    downloadedInstances.put(instance.getAddress(), 1);
+                }
+            }
+        }
     }
 
     public static Integer getNumberOfOverloadedWorkers() {
