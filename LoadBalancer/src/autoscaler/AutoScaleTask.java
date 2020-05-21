@@ -14,10 +14,10 @@ public class AutoScaleTask extends TimerTask {
         Integer overloadedNumber = AutoScaler.getNumberOfOverloadedWorkers();
         Integer downloadedNumber = AutoScaler.getNumberOfDownloadedWorkers();
         logger.info("Autoscaling check: over: " + overloadedNumber + " - down: " + downloadedNumber);
-        if (overloadedNumber > 1) {
+        if (overloadedNumber >= 1) {
             InstancesManager.getSingleton().createInstance();
         }
-        if (downloadedNumber < 1) {
+        if (downloadedNumber >= 1) {
             InstancesManager.getSingleton().shutDownInstanceWithLeastLoad();
         }
     }
