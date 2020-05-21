@@ -127,6 +127,7 @@ public class InstancesManager {
         Collections.sort(instances, InstanceProxy.LOAD_COMPARATOR);
         InstanceProxy instance = instances.get(instances.size() - 1);
         instance.startShutDown();
+        logger.info("The instance " + instance.getAddress() + " is being shutdown");
     }
 
 }
