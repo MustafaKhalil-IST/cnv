@@ -60,6 +60,7 @@ public class InstanceProxy {
         currentLoad -= estimatedLoad;
         estimatedRequestsLoads.remove(request.getRequestID());
         currentRequests.remove(request.getRequestID());
+        logger.info("Instance " + getAddress() + " current load is " + currentLoad);
     }
 
     private synchronized void shutDown(AmazonEC2 client) {
@@ -124,7 +125,7 @@ public class InstanceProxy {
         this.checkStatus.schedule(new ShutDownStatusTask(InstancesManager.ec2, this), STATUS_CHECK_INTERVAL, STATUS_CHECK_INTERVAL);
     }
 
-    class StartUpStatusTask extends TimerTask {
+    static class StartUpStatusTask extends TimerTask {
 
         AmazonEC2 client;
         InstanceProxy instance;

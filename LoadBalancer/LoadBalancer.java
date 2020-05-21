@@ -33,13 +33,13 @@ public class LoadBalancer  implements Runnable {
                 try {
                     this.wait();
                 } catch (Exception e) {
-                    logger.warning("There was an exception waiting for shutdown, check the stacktrace for more errors.");
+                    logger.warning("Error !!");
                     logger.warning(e.getMessage());
                     e.printStackTrace();
                 }
             }
         } catch (IOException t) {
-            logger.warning("There was an exception handling, check the stacktrace for more errors.");
+            logger.warning("Server error !!");
             logger.warning(t.getMessage());
             t.printStackTrace();
         }
@@ -47,10 +47,10 @@ public class LoadBalancer  implements Runnable {
 
     static void shutdown() {
         try {
-            logger.info("Shutting down the LoadBalancer!");
+            logger.info("Shutting down the Load Balancer!");
             balancer.httpServer.stop(0);
         } catch (Exception e) {
-            logger.warning("There was an exception when shutting down the server, check the stacktrace");
+            logger.warning("Error while Shutting down !!");
             logger.warning(e.getMessage());
             e.printStackTrace();
         } finally {
@@ -67,14 +67,11 @@ public class LoadBalancer  implements Runnable {
         balancerThread.start();
         Thread autoScalerThread = new Thread(new AutoScaler());
         autoScalerThread.start();
-        // Thread estimatorThread = new Thread(new Estimator());
-        // estimatorThread.start();
         Runtime.getRuntime().addShutdownHook(new OnShutdown());
         new Shutdown().start();
         try {
             balancerThread.join();
             autoScalerThread.interrupt();
-            // estimatorThread.interrupt();
             logger.info("Load Balancer has been terminated");
         } catch (Exception e) {
             logger.warning("Load Balancer Exception");
