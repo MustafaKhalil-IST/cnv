@@ -101,8 +101,7 @@ public class InstancesManager {
 
     public InstanceProxy getBestInstance(long cost) {
         for (InstanceProxy instance: instances) {
-            if (instance.currentLoad  + cost < InstanceProxy.MAX_LOAD &&
-                    instance.status.equals(InstanceStatus.ACTIVE)) {
+            if (instance.currentLoad + cost < InstanceProxy.MAX_LOAD && instance.status.equals(InstanceStatus.STARTED)) {
                 return instance;
             }
         }
