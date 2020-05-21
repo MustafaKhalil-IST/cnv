@@ -12,6 +12,7 @@ import src.estimation.EstimationsCalculator;
 import storage.dynamo.Request;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -143,7 +144,13 @@ public class LoadBalanceHandler implements HttpHandler {
             connection.addRequestProperty("Content-Type", "application/" + "POST");
             if (body != null) {
                 connection.setRequestProperty("Content-Length", Integer.toString(body.length()));
-                connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
+                try {
+                    connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
+                } catch (ConnectException ce) {
+                    logger.warning(ce.getMessage());
+                    Thread.sleep(5000); // TODO
+                    connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
+                }
             }
 
             InputStream is = connection.getInputStream();
