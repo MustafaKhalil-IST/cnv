@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 public class LoadBalancer  implements Runnable {
     private final static Logger logger = Logger.getLogger(LoadBalancer.class.getName());
-    private final static int PORT = Integer.parseInt(PropertiesReader.getInstance().getProperty("load-balance.port"));
+    private final static int PORT = Integer.parseInt(PropertiesReader.getSingleton().getProperty("load-balance.port"));
     private final static LoadBalancer balancer = new LoadBalancer();
     private LoadBalanceHandler loadBalanceHandler = new LoadBalanceHandler();
     private HttpServer httpServer;

@@ -7,7 +7,7 @@ import src.properties.PropertiesReader;
 import java.util.*;
 
 public class AutoScaler implements Runnable{
-    static PropertiesReader reader = PropertiesReader.getInstance();
+    static PropertiesReader reader = PropertiesReader.getSingleton();
     static Timer monitor = new Timer();
     public static ScalingPolicy INCREASE = new ScalingPolicy(
             Integer.parseInt(reader.getProperty("auto-scale.increase.load")),

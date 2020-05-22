@@ -7,22 +7,22 @@ import java.util.Properties;
 public class PropertiesReader {
     String file = "config.properties";
     Properties prop = new Properties();
-    private static PropertiesReader instance;
+    private static PropertiesReader singleton;
 
     private PropertiesReader() {
-        InputStream configfile = null;
+        InputStream configFile = null;
         try {
-            configfile = PropertiesReader.class.getClassLoader().getResourceAsStream(file);
-            if(configfile == null){
-                throw new RuntimeException("config file is missing");
+            configFile = PropertiesReader.class.getClassLoader().getResourceAsStream(file);
+            if(configFile == null){
+                throw new RuntimeException("config file is missing!");
             }
-            prop.load(configfile);
+            prop.load(configFile);
         } catch (IOException e) {
             e.printStackTrace();
         } finally{
-            if(configfile!=null){
+            if(configFile!=null){
                 try {
-                    configfile.close();
+                    configFile.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -30,11 +30,11 @@ public class PropertiesReader {
         }
     }
 
-    public static synchronized PropertiesReader getInstance(){
-        if(instance == null){
-            instance = new PropertiesReader();
+    public static synchronized PropertiesReader getSingleton(){
+        if(singleton == null){
+            singleton = new PropertiesReader();
         }
-        return instance;
+        return singleton;
     }
 
     public String getProperty(String property) {

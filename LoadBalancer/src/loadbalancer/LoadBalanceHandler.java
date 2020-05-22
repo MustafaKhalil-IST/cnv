@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 
 public class LoadBalanceHandler implements HttpHandler {
     private static Logger logger = Logger.getLogger(LoadBalanceHandler.class.getName());
-    static AmazonEC2 ec2;
+    static AmazonEC2 client;
 
     public LoadBalanceHandler(){
         super();
@@ -36,7 +36,7 @@ public class LoadBalanceHandler implements HttpHandler {
         catch (Exception e) {
             throw new RuntimeException("Credentials not found or not correct", e);
         }
-        ec2 = AmazonEC2ClientBuilder
+        client = AmazonEC2ClientBuilder
                 .standard()
                 .withRegion(Regions.US_EAST_1)
                 .withCredentials(credentialsProvider)
@@ -140,6 +140,7 @@ public class LoadBalanceHandler implements HttpHandler {
                     connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
                 } catch (ConnectException ce) {
                     logger.warning(ce.getMessage());
+                    // Retry sending the request when getting a connection refuse after 5 seconds
                     Thread.sleep(5000); // TODO
                     connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
                 }

@@ -15,8 +15,8 @@ public class InstanceProxy {
 
     private final static Logger logger = Logger.getLogger(InstanceProxy.class.getName());
 
-    public final static long MAX_LOAD = Integer.parseInt(PropertiesReader.getInstance().getProperty("instance.max-load"));
-    final static int STATUS_CHECK_INTERVAL = Integer.parseInt(PropertiesReader.getInstance().getProperty("status.check.interval"));
+    public final static long MAX_LOAD = Integer.parseInt(PropertiesReader.getSingleton().getProperty("instance.max-load"));
+    final static int STATUS_CHECK_PERIOD = Integer.parseInt(PropertiesReader.getSingleton().getProperty("status.check.interval"));
     String address;
     String instanceID;
     Long currentLoad = 0L;
@@ -38,10 +38,10 @@ public class InstanceProxy {
         status = InstanceStatus.ACTIVE;
     }
 
-    private InstanceProxy(String instanceID) {
+    public InstanceProxy(String instanceID) {
         this.instanceID = instanceID;
         status = InstanceStatus.STARTING;
-        checkStatus.schedule(new StartUpStatusTask(InstancesManager.ec2, this), STATUS_CHECK_INTERVAL, STATUS_CHECK_INTERVAL);
+        checkStatus.schedule(new StartUpStatusTask(InstancesManager.client, this), STATUS_CHECK_PERIOD, STATUS_CHECK_PERIOD);
     }
 
     public InstanceStatus getStatus(){
@@ -76,7 +76,7 @@ public class InstanceProxy {
 
     public static InstanceProxy connectToAnInstance(AmazonEC2 client) {
         RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
-        PropertiesReader reader = PropertiesReader.getInstance();
+        PropertiesReader reader = PropertiesReader.getSingleton();
         runInstancesRequest.withImageId(reader.getProperty("image.id"))
                 .withInstanceType(reader.getProperty("instance.type"))
                 .withMinCount(1)
@@ -94,7 +94,7 @@ public class InstanceProxy {
     }
 
     public void updateAddress(String newAddress) {
-        address = newAddress + ":" + PropertiesReader.getInstance().getProperty("instance.port");
+        address = newAddress + ":" + PropertiesReader.getSingleton().getProperty("instance.port");
     }
 
     private DescribeInstancesResult describeInstance(AmazonEC2 client) {
@@ -126,7 +126,7 @@ public class InstanceProxy {
 
     public synchronized void startShutDown() {
         this.status = InstanceStatus.STOPPED;
-        this.checkStatus.schedule(new ShutDownStatusTask(InstancesManager.ec2, this), STATUS_CHECK_INTERVAL, STATUS_CHECK_INTERVAL);
+        this.checkStatus.schedule(new ShutDownStatusTask(InstancesManager.client, this), STATUS_CHECK_PERIOD, STATUS_CHECK_PERIOD);
     }
 
     static class StartUpStatusTask extends TimerTask {

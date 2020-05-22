@@ -20,11 +20,11 @@ import java.util.logging.Logger;
 
 public class InstancesManager {
     private final static Logger logger = Logger.getLogger(InstancesManager.class.getName());
-    static AmazonEC2 ec2 = null;
+    static AmazonEC2 client = null;
     private static InstancesManager singleton = new InstancesManager();
     private List<InstanceProxy> instances = new ArrayList<InstanceProxy>();
     private AtomicInteger nextInstance = new AtomicInteger(0);
-    final Integer TOLERANCE = 500; //TODO
+    final Integer TOLERANCE = Integer.parseInt(PropertiesReader.getSingleton().getProperty("instance.tolerance"));
 
     private InstancesManager(){
     }
@@ -37,30 +37,35 @@ public class InstancesManager {
         catch (Exception e) {
             throw new RuntimeException("Error loading credentials", e);
         }
-        ec2 = AmazonEC2ClientBuilder
+
+        client = AmazonEC2ClientBuilder
                 .standard()
                 .withRegion(Regions.US_EAST_1)
                 .withCredentials(credentialsProvider)
                 .build();
 
-        DescribeInstancesResult describeInstancesRequest = ec2.describeInstances();
+        DescribeInstancesResult describeInstancesRequest = client.describeInstances();
         List<Reservation> reservations = describeInstancesRequest.getReservations();
-        PropertiesReader reader = PropertiesReader.getInstance();
+        PropertiesReader reader = PropertiesReader.getSingleton();
         for (Reservation reservation : reservations) {
             for(Instance instance : reservation.getInstances()){
                 if (instance.getState().getName().equals(InstanceStateName.Running.toString()) &&
                         instance.getImageId().equals(reader.getProperty("image.id")) &&
                         instance.getInstanceType().equals(reader.getProperty("instance.type"))) {
 
-                    instances.add(new InstanceProxy(instance.getPublicIpAddress(), instance.getInstanceId()));
+                    InstanceProxy instanceProxy = new InstanceProxy(instance.getInstanceId());
+                    instanceProxy.updateAddress(instance.getPublicIpAddress());
+                    instances.add(instanceProxy);
 
                     logger.info("Adding " + instance.getInstanceId() + " " + instance.getState().getName() + " " +
                             instance.getImageId() + " " + instance.getInstanceType());
                 }
             }
         }
-        if (instances.isEmpty()) {
-            addInstance(InstanceProxy.connectToAnInstance(ec2));
+
+        int minimumNumberOfInstances = Integer.parseInt(PropertiesReader.getSingleton().getProperty("auto-scale.decrease.min.instances"));
+        for(int i = 0; i < minimumNumberOfInstances - instances.size(); i++) {
+            addInstance(InstanceProxy.connectToAnInstance(client));
         }
     }
 
@@ -87,7 +92,7 @@ public class InstancesManager {
     public void createInstance() {
         if (instances.size() < AutoScaler.INCREASE.getNumberOfWorkers()) {
             logger.info("Creating a new Instance");
-            addInstance(InstanceProxy.connectToAnInstance(ec2));
+            addInstance(InstanceProxy.connectToAnInstance(client));
         }
     }
 
