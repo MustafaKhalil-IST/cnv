@@ -68,7 +68,7 @@ public class EstimationsCalculator {
         }
         long res;
         if (cnt == 0) {
-            res = 1000;
+            res = 1000; // TODO
         } else {
             res = Math.round(cost / cnt);
         }

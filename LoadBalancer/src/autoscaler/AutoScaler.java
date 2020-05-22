@@ -13,19 +13,23 @@ public class AutoScaler implements Runnable{
             Integer.parseInt(reader.getProperty("auto-scale.increase.load")),
             Integer.parseInt(reader.getProperty("auto-scale.increase.load.for.more.than")),
             Integer.parseInt(reader.getProperty("auto-scale.increase.max.instances")));
+
     public static ScalingPolicy DECREASE = new ScalingPolicy(
             Integer.parseInt(reader.getProperty("auto-scale.decrease.load")),
             Integer.parseInt(reader.getProperty("auto-scale.decrease.load.for.more.than")),
             Integer.parseInt(reader.getProperty("auto-scale.decrease.min.instances")));
-    static final int period = Integer.parseInt(reader.getProperty("auto-scale.check.period"));
+
+    static final int CHECK_OVERLOADED_WORKERS_PERIOD = Integer.parseInt(reader.getProperty("auto-scale.check.overloaded.period"));
+    static final int CHECK_DOWNLOADED_WORKERS_PERIOD = Integer.parseInt(reader.getProperty("auto-scale.check.downloaded.period"));
+
     public final static Integer CHECK_DOWNLOADED_WORKERS = 1;
     public final static Integer CHECK_OVERLOADED_WORKERS = 2;
     Map<String, Integer> downloadedInstances = new HashMap<>();
 
     @Override
     public void run() {
-        monitor.schedule(new AutoScaleTask(CHECK_OVERLOADED_WORKERS), period, 2 * period);
-        monitor.schedule(new AutoScaleTask(CHECK_OVERLOADED_WORKERS), period, period);
+        monitor.schedule(new AutoScaleTask(CHECK_OVERLOADED_WORKERS), CHECK_OVERLOADED_WORKERS_PERIOD, CHECK_OVERLOADED_WORKERS_PERIOD);
+        monitor.schedule(new AutoScaleTask(CHECK_DOWNLOADED_WORKERS), CHECK_DOWNLOADED_WORKERS_PERIOD, CHECK_DOWNLOADED_WORKERS_PERIOD);
     }
 
     public void updateDownloadedInstances() {

@@ -21,8 +21,8 @@ public class InstanceProxy {
     String instanceID;
     Long currentLoad = 0L;
     InstanceStatus status;
-    HashMap<String, Request> currentRequests = new HashMap<>();
-    HashMap<String, Long> estimatedRequestsLoads = new HashMap<>();
+    HashMap<String, Request> currentRequests = new HashMap<>(); // TODO
+    HashMap<String, Long> estimatedRequestsLoads = new HashMap<>(); // TODO
     Timer checkStatus = new Timer();
 
     static final Comparator<InstanceProxy> LOAD_COMPARATOR = new Comparator<InstanceProxy>() {

@@ -23,9 +23,9 @@ public class InstancesManager {
     static AmazonEC2 ec2 = null;
     private static InstancesManager singleton = new InstancesManager();
     private List<InstanceProxy> instances = new ArrayList<InstanceProxy>();
-    private List<InstanceProxy> roundRobinPool = new ArrayList<>();
+    private List<InstanceProxy> roundRobinPool = new ArrayList<>(); // TODO
     private AtomicInteger nextInstance = new AtomicInteger(0);
-    final Integer TOLERANCE = 500;
+    final Integer TOLERANCE = 500; //TODO
 
     private InstancesManager(){
     }
