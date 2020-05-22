@@ -4,10 +4,7 @@ import src.loadbalancer.InstanceProxy;
 import src.loadbalancer.InstancesManager;
 import src.properties.PropertiesReader;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
+import java.util.*;
 
 public class AutoScaler implements Runnable{
     static PropertiesReader reader = PropertiesReader.getInstance();
@@ -21,11 +18,14 @@ public class AutoScaler implements Runnable{
             Integer.parseInt(reader.getProperty("auto-scale.decrease.load.for.more.than")),
             Integer.parseInt(reader.getProperty("auto-scale.decrease.min.instances")));
     static final int period = Integer.parseInt(reader.getProperty("auto-scale.check.period"));
+    public final static Integer CHECK_DOWNLOADED_WORKERS = 1;
+    public final static Integer CHECK_OVERLOADED_WORKERS = 2;
     Map<String, Integer> downloadedInstances = new HashMap<>();
 
     @Override
     public void run() {
-        monitor.schedule(new AutoScaleTask(), period, period);
+        monitor.schedule(new AutoScaleTask(CHECK_OVERLOADED_WORKERS), period, 2 * period);
+        monitor.schedule(new AutoScaleTask(CHECK_OVERLOADED_WORKERS), period, period);
     }
 
     public void updateDownloadedInstances() {
