@@ -2,10 +2,10 @@ package src.autoscaler;
 
 public class ScalingPolicy {
     private int periodToAct;
-    private int loadPercentageToAct;
+    private double loadPercentageToAct;
     private int numberOfWorkers;
 
-    public ScalingPolicy(int loadPercentage, int periodToAct, int numberOfWorkers) {
+    public ScalingPolicy(double loadPercentage, int periodToAct, int numberOfWorkers) {
         this.periodToAct = periodToAct;
         this.loadPercentageToAct = loadPercentage;
         this.numberOfWorkers = numberOfWorkers;
@@ -19,7 +19,7 @@ public class ScalingPolicy {
         this.periodToAct = periodToAct;
     }
 
-    public int getLoadPercentageToAct() {
+    public double getLoadPercentageToAct() {
         return loadPercentageToAct;
     }
 

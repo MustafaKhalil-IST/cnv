@@ -41,7 +41,7 @@ public class InstanceProxy {
     public InstanceProxy(String instanceID) {
         this.instanceID = instanceID;
         status = InstanceStatus.STARTING;
-        checkStatus.schedule(new StartUpStatusTask(InstancesManager.client, this), STATUS_CHECK_PERIOD, STATUS_CHECK_PERIOD);
+        checkStatus.schedule(new CheckStatusTask(InstancesManager.client, this), STATUS_CHECK_PERIOD, STATUS_CHECK_PERIOD);
     }
 
     public InstanceStatus getStatus(){
@@ -126,15 +126,15 @@ public class InstanceProxy {
 
     public synchronized void startShutDown() {
         this.status = InstanceStatus.STOPPED;
-        this.checkStatus.schedule(new ShutDownStatusTask(InstancesManager.client, this), STATUS_CHECK_PERIOD, STATUS_CHECK_PERIOD);
+        this.checkStatus.schedule(new CheckStatusBeforeShutDownTask(InstancesManager.client, this), STATUS_CHECK_PERIOD, STATUS_CHECK_PERIOD);
     }
 
-    static class StartUpStatusTask extends TimerTask {
+    static class CheckStatusTask extends TimerTask {
 
         AmazonEC2 client;
         InstanceProxy instance;
 
-        public StartUpStatusTask(AmazonEC2 client, InstanceProxy instance){
+        public CheckStatusTask(AmazonEC2 client, InstanceProxy instance){
             this.client = client;
             this.instance = instance;
         }
@@ -151,12 +151,12 @@ public class InstanceProxy {
         }
     }
 
-    class ShutDownStatusTask extends TimerTask {
+    class CheckStatusBeforeShutDownTask extends TimerTask {
         AmazonEC2 client;
         InstanceProxy instance;
 
-        public ShutDownStatusTask(AmazonEC2 ec2, InstanceProxy instance) {
-            this.client = ec2;
+        public CheckStatusBeforeShutDownTask(AmazonEC2 client, InstanceProxy instance) {
+            this.client = client;
             this.instance = instance;
         }
 
