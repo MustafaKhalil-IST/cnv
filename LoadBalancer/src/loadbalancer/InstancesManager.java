@@ -99,6 +99,10 @@ public class InstancesManager {
     }
 
     public InstanceProxy getBestInstance(long cost) {
+        if (nextInstance.get() >= instances.size()) {
+            nextInstance.set(nextInstance.get() % instances.size());
+        }
+        
         InstanceProxy instance  = roundRobinPool.get(nextInstance.get());
         while (!isInstanceReadyToLoadCost(instance, cost)) {
             logger.warning("There is no ready instance to execute the request - Waiting ... ");
