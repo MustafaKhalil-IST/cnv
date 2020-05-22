@@ -15,7 +15,7 @@ import src.properties.PropertiesReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 public class InstancesManager {
@@ -24,7 +24,7 @@ public class InstancesManager {
     private static InstancesManager singleton = new InstancesManager();
     private List<InstanceProxy> instances = new ArrayList<InstanceProxy>();
     private List<InstanceProxy> roundRobinPool = new ArrayList<>();
-    private Integer nextInstance = 0;
+    private AtomicInteger nextInstance = new AtomicInteger(0);
     final Integer TOLERANCE = 500;
 
     private InstancesManager(){
@@ -99,7 +99,7 @@ public class InstancesManager {
     }
 
     public InstanceProxy getBestInstance(long cost) {
-        InstanceProxy instance  = roundRobinPool.get(nextInstance);
+        InstanceProxy instance  = roundRobinPool.get(nextInstance.get());
         while (!isInstanceReadyToLoadCost(instance, cost)) {
             logger.warning("There is no ready instance to execute the request - Waiting ... ");
             try {
@@ -107,9 +107,11 @@ public class InstancesManager {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            nextInstance = (nextInstance + 1) % roundRobinPool.size();
-            instance  = roundRobinPool.get(nextInstance);
+            nextInstance.getAndIncrement();
+            nextInstance.set(nextInstance.get() % roundRobinPool.size());
+            instance  = roundRobinPool.get(nextInstance.get());
         }
+        logger.warning("Next instance is " + nextInstance.get());
         return instance;
     }
 
