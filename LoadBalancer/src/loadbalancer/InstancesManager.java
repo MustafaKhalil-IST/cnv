@@ -23,7 +23,6 @@ public class InstancesManager {
     static AmazonEC2 ec2 = null;
     private static InstancesManager singleton = new InstancesManager();
     private List<InstanceProxy> instances = new ArrayList<InstanceProxy>();
-    private List<InstanceProxy> roundRobinPool = new ArrayList<>(); // TODO
     private AtomicInteger nextInstance = new AtomicInteger(0);
     final Integer TOLERANCE = 500; //TODO
 
@@ -79,12 +78,10 @@ public class InstancesManager {
 
     public void addInstance(InstanceProxy instance) {
         instances.add(instance);
-        roundRobinPool.add(instance);
     }
 
     public void removeInstance(InstanceProxy instance) {
         instances.remove(instance);
-        roundRobinPool.remove(instance);
     }
 
     public void createInstance() {
@@ -102,8 +99,10 @@ public class InstancesManager {
         if (nextInstance.get() >= instances.size()) {
             nextInstance.set(nextInstance.get() % instances.size());
         }
-        
-        InstanceProxy instance  = roundRobinPool.get(nextInstance.get());
+
+        nextInstance.getAndIncrement();
+        nextInstance.set(nextInstance.get() % instances.size());
+        InstanceProxy instance  = instances.get(nextInstance.get());
         while (!isInstanceReadyToLoadCost(instance, cost)) {
             logger.warning("There is no ready instance to execute the request - Waiting ... ");
             try {
@@ -112,8 +111,8 @@ public class InstancesManager {
                 e.printStackTrace();
             }
             nextInstance.getAndIncrement();
-            nextInstance.set(nextInstance.get() % roundRobinPool.size());
-            instance  = roundRobinPool.get(nextInstance.get());
+            nextInstance.set(nextInstance.get() % instances.size());
+            instance  = instances.get(nextInstance.get());
         }
         logger.warning("Next instance is " + nextInstance.get());
         return instance;
