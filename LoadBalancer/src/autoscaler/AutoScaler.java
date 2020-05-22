@@ -51,7 +51,6 @@ public class AutoScaler implements Runnable{
         return count;
     }
 
-
     public static Integer getNumberOfDownloadedWorkers() {
         Integer count = 0;
         for(InstanceProxy instance: InstancesManager.getSingleton().getInstances()) {

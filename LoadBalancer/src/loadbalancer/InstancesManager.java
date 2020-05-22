@@ -23,6 +23,8 @@ public class InstancesManager {
     static AmazonEC2 ec2 = null;
     private static InstancesManager singleton = new InstancesManager();
     private List<InstanceProxy> instances = new ArrayList<InstanceProxy>();
+    private List<InstanceProxy> roundRobinPool = new ArrayList<>();
+    private Integer nextInstance = 0;
     final Integer TOLERANCE = 500;
 
     private InstancesManager(){
@@ -77,20 +79,12 @@ public class InstancesManager {
 
     public void addInstance(InstanceProxy instance) {
         instances.add(instance);
+        roundRobinPool.add(instance);
     }
 
     public void removeInstance(InstanceProxy instance) {
         instances.remove(instance);
-    }
-
-    public Double getAverageLoad() {
-        double nrInstances = 0;
-        double totalLoad = 0;
-        for (InstanceProxy instance: instances) {
-            nrInstances++;
-            totalLoad += instance.getLoadPercentage();
-        }
-        return totalLoad / nrInstances;
+        roundRobinPool.remove(instance);
     }
 
     public void createInstance() {
@@ -100,13 +94,23 @@ public class InstancesManager {
         }
     }
 
+    private Boolean isInstanceReadyToLoadCost(InstanceProxy instance, long cost) {
+        return instance.currentLoad + cost < InstanceProxy.MAX_LOAD + TOLERANCE && instance.status.equals(InstanceStatus.STARTED);
+    }
+
     public InstanceProxy getBestInstance(long cost) {
-        for (InstanceProxy instance: instances) {
-            if (instance.currentLoad + cost < InstanceProxy.MAX_LOAD + TOLERANCE && instance.status.equals(InstanceStatus.STARTED)) {
-                return instance;
+        InstanceProxy instance  = roundRobinPool.get(nextInstance);
+        while (!isInstanceReadyToLoadCost(instance, cost)) {
+            logger.warning("There is no ready instance to execute the request - Waiting ... ");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            nextInstance = (nextInstance + 1) % roundRobinPool.size();
+            instance  = roundRobinPool.get(nextInstance);
         }
-        return null;
+        return instance;
     }
 
     public void shutDown() {

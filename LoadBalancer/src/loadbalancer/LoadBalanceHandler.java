@@ -16,9 +16,7 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class LoadBalanceHandler implements HttpHandler {
@@ -126,13 +124,7 @@ public class LoadBalanceHandler implements HttpHandler {
     private String redirectAndProcessRequestByWorker(Request request, long cost, String body) {
         HttpURLConnection connection = null;
         try {
-            InstanceProxy instance = InstancesManager.getSingleton().getBestInstance(cost);;
-            while (instance == null) {
-                logger.warning("There is no ready instance to execute the request " + request.getQuery() + "- Waiting ... ");
-                Thread.sleep(1000);
-                instance = InstancesManager.getSingleton().getBestInstance(cost);
-            }
-
+            InstanceProxy instance = InstancesManager.getSingleton().getBestInstance(cost);
             instance.addRequest(request, cost);
 
             logger.info("The request will be redirected to: " + instance.getAddress());
