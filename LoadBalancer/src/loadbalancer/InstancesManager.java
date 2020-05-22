@@ -64,7 +64,9 @@ public class InstancesManager {
         }
 
         int minimumNumberOfInstances = Integer.parseInt(PropertiesReader.getSingleton().getProperty("auto-scale.decrease.min.instances"));
-        for(int i = 0; i < minimumNumberOfInstances - instances.size(); i++) {
+        int currentNumberOfInstances = instances.size();
+        logger.info("Adding " + (minimumNumberOfInstances - currentNumberOfInstances) + " instances ... ");
+        for(int i = 0; i < minimumNumberOfInstances - currentNumberOfInstances; i++) {
             addInstance(InstanceProxy.connectToAnInstance(client));
         }
     }
