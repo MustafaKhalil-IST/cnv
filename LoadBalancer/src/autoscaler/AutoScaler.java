@@ -39,6 +39,7 @@ public class AutoScaler implements Runnable{
     }
 
     public static Integer getNumberOfDownloadedWorkers() {
+        System.out.println("Downloaded Percentage: " + AutoScaler.DECREASE.getLoadPercentageToAct());
         Integer count = 0;
         for(InstanceProxy instance: InstancesManager.getSingleton().getInstances()) {
             if (instance.getLoadPercentage() < AutoScaler.DECREASE.getLoadPercentageToAct()) {
