@@ -92,7 +92,7 @@ public class InstanceProxy {
         return client.describeInstances(describeInstancesRequest);
     }
 
-    boolean updateState(AmazonEC2 client){
+    boolean updateStatus(AmazonEC2 client){
         DescribeInstancesResult describeInstancesResult = describeInstance(client);
         InstanceState state = describeInstancesResult.getReservations().get(0).getInstances().get(0).getState();
         if(state.getName().equals(InstanceStateName.Pending.toString())){

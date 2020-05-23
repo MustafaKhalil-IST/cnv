@@ -15,6 +15,7 @@ public class CheckStatusBeforeShutDown extends TimerTask {
 
     @Override
     public void run() {
+        // Shut down only if there is no requests left to be done by the instance
         if (instance.currentRequests.isEmpty()) {
             instance.shutDown(client);
             InstancesManager.getSingleton().removeInstance(instance);

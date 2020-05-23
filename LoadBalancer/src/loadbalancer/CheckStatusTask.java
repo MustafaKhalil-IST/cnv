@@ -1,6 +1,7 @@
 package src.loadbalancer;
 
 import com.amazonaws.services.ec2.AmazonEC2;
+import storage.dynamo.Request;
 
 import java.util.TimerTask;
 import java.util.logging.Logger;
@@ -18,7 +19,7 @@ class CheckStatusTask extends TimerTask {
     public void run() {
         logger.info("Checking Status of Instance " + instance.instanceID);
         if(instance.status.equals(InstanceStatus.STARTING)){
-            if (instance.updateState(client)) {
+            if (instance.updateStatus(client)) {
                 this.cancel();
             }
         } else {

@@ -72,7 +72,7 @@ public class EstimationsCalculator {
         } else {
             res = Math.round(cost / cnt);
         }
-        logger.info("estimated cost for " + request.getQuery() + " is " + res);
+        logger.info("Estimated cost for " + request.getQuery() + " is " + res);
         return res;
     }
 

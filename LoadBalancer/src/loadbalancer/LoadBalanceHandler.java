@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 public class LoadBalanceHandler implements HttpHandler {
@@ -93,7 +94,6 @@ public class LoadBalanceHandler implements HttpHandler {
         String buffer = redirectAndProcessRequestByWorker(request, cost, body);
         if (buffer != null) {
             logger.info("The response is " + buffer);
-
             final Headers hdrs = t.getResponseHeaders();
 
             hdrs.add("Content-Type", "application/json");
@@ -115,45 +115,51 @@ public class LoadBalanceHandler implements HttpHandler {
             os.close();
 
             logger.info("> Sent response to " + t.getRemoteAddress().toString());
-
         } else {
             logger.warning("empty buffer");
         }
     }
 
-    private String redirectAndProcessRequestByWorker(Request request, long cost, String body) {
+    public static String redirectAndProcessRequestByWorker(Request request, long cost, String body) {
         HttpURLConnection connection = null;
         try {
-            InstanceProxy instance = InstancesManager.getSingleton().getBestInstance(cost);
-            instance.addRequest(request, cost);
+            while (true) {
+                InstanceProxy instance = InstancesManager.getSingleton().getBestInstance(cost);
+                instance.addRequest(request, cost);
 
-            logger.info("The request will be redirected to: " + instance.getAddress());
-            URL url = new URL("http://" + instance.getAddress() + "/sudoku?" + request.getQuery());
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setUseCaches(false);
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-            connection.addRequestProperty("Content-Type", "application/" + "POST");
-            if (body != null) {
-                connection.setRequestProperty("Content-Length", Integer.toString(body.length()));
-                try {
-                    connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
-                } catch (ConnectException ce) {
-                    logger.warning(ce.getMessage());
-                    // Retry sending the request when getting a connection refuse after 5 seconds
-                    Thread.sleep(5000); // TODO
-                    connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
+                logger.info("The request will be redirected to: " + instance.getAddress());
+                URL url = new URL("http://" + instance.getAddress() + "/sudoku?" + request.getQuery());
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setUseCaches(false);
+                connection.setDoInput(true);
+                connection.setDoOutput(true);
+                connection.addRequestProperty("Content-Type", "application/" + "POST");
+                if (body != null) {
+                    connection.setRequestProperty("Content-Length", Integer.toString(body.length()));
+                    try {
+                        connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
+                    } catch (ConnectException ce) {
+                        logger.warning(ce.getMessage());
+                        // Retry sending the request when getting a connection refuse after 5 seconds
+                        Thread.sleep(5000); // TODO
+                        connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
+                    }
                 }
+                String buffer;
+                try {
+                    InputStream is = connection.getInputStream();
+                    InputStreamReader isr = new InputStreamReader(is);
+                    BufferedReader in = new BufferedReader(isr);
+                    buffer = in.readLine();
+                    in.close();
+                } catch (Exception e) {
+                    /*In case of failure, redirect the request to the next instance*/
+                    continue;
+                }
+
+                instance.updateInstanceLoad(request);
+                return buffer;
             }
-
-            InputStream is = connection.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader in = new BufferedReader(isr);
-            String buffer = in.readLine();
-            in.close();
-
-            instance.updateInstanceLoad(request);
-            return buffer;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
