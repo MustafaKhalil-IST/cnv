@@ -8,7 +8,6 @@ import storage.dynamo.Request;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.logging.Logger;
 
 public class InstanceProxy {
@@ -21,9 +20,9 @@ public class InstanceProxy {
     String instanceID;
     Long currentLoad = 0L;
     InstanceStatus status;
-    HashMap<String, Request> currentRequests = new HashMap<>(); // TODO
-    HashMap<String, Long> estimatedRequestsLoads = new HashMap<>(); // TODO
-    Timer checkStatus = new Timer();
+    HashMap<String, Request> currentRequests = new HashMap<>();
+    HashMap<String, Long> estimatedRequestsLoads = new HashMap<>();
+    Timer checkStatusMonitor = new Timer();
 
     static final Comparator<InstanceProxy> LOAD_COMPARATOR = new Comparator<InstanceProxy>() {
         @Override
@@ -32,16 +31,10 @@ public class InstanceProxy {
         }
     };
 
-    public InstanceProxy(String ip, String instanceID) {
-        updateAddress(ip);
-        this.instanceID = instanceID;
-        status = InstanceStatus.ACTIVE;
-    }
-
     public InstanceProxy(String instanceID) {
         this.instanceID = instanceID;
         status = InstanceStatus.STARTING;
-        checkStatus.schedule(new CheckStatusTask(InstancesManager.client, this), STATUS_CHECK_PERIOD, STATUS_CHECK_PERIOD);
+        checkStatusMonitor.schedule(new CheckStatusTask(InstancesManager.client, this), STATUS_CHECK_PERIOD, STATUS_CHECK_PERIOD);
     }
 
     public InstanceStatus getStatus(){
@@ -67,13 +60,6 @@ public class InstanceProxy {
         logger.info("Instance " + getAddress() + " current load is " + currentLoad);
     }
 
-    private synchronized void shutDown(AmazonEC2 client) {
-        status = InstanceStatus.STOPPING;
-        TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest();
-        terminateInstancesRequest.withInstanceIds(instanceID);
-        client.terminateInstances(terminateInstancesRequest);
-    }
-
     public static InstanceProxy connectToAnInstance(AmazonEC2 client) {
         RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
         PropertiesReader reader = PropertiesReader.getSingleton();
@@ -97,12 +83,16 @@ public class InstanceProxy {
         address = newAddress + ":" + PropertiesReader.getSingleton().getProperty("instance.port");
     }
 
+    public String getAddress() {
+        return address;
+    }
+
     private DescribeInstancesResult describeInstance(AmazonEC2 client) {
         DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(this.instanceID);
         return client.describeInstances(describeInstancesRequest);
     }
 
-    private boolean updateState(AmazonEC2 client){
+    boolean updateState(AmazonEC2 client){
         DescribeInstancesResult describeInstancesResult = describeInstance(client);
         InstanceState state = describeInstancesResult.getReservations().get(0).getInstances().get(0).getState();
         if(state.getName().equals(InstanceStateName.Pending.toString())){
@@ -120,54 +110,15 @@ public class InstanceProxy {
         }
     }
 
-    public String getAddress() {
-        return address;
-    }
-
     public synchronized void startShutDown() {
-        this.status = InstanceStatus.STOPPED;
-        this.checkStatus.schedule(new CheckStatusBeforeShutDownTask(InstancesManager.client, this), STATUS_CHECK_PERIOD, STATUS_CHECK_PERIOD);
+        status = InstanceStatus.STOPPED;
+        checkStatusMonitor.schedule(new CheckStatusBeforeShutDown(InstancesManager.client, this), STATUS_CHECK_PERIOD, STATUS_CHECK_PERIOD);
     }
 
-    static class CheckStatusTask extends TimerTask {
-
-        AmazonEC2 client;
-        InstanceProxy instance;
-
-        public CheckStatusTask(AmazonEC2 client, InstanceProxy instance){
-            this.client = client;
-            this.instance = instance;
-        }
-
-        public void run() {
-            logger.info("Checking Status of Instance " + instance.instanceID);
-            if(instance.status.equals(InstanceStatus.STARTING)){
-                if (instance.updateState(client)) {
-                    this.cancel();
-                }
-            } else {
-                this.cancel();
-            }
-        }
+    synchronized void shutDown(AmazonEC2 client) {
+        status = InstanceStatus.STOPPING;
+        TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest();
+        terminateInstancesRequest.withInstanceIds(instanceID);
+        client.terminateInstances(terminateInstancesRequest);
     }
-
-    class CheckStatusBeforeShutDownTask extends TimerTask {
-        AmazonEC2 client;
-        InstanceProxy instance;
-
-        public CheckStatusBeforeShutDownTask(AmazonEC2 client, InstanceProxy instance) {
-            this.client = client;
-            this.instance = instance;
-        }
-
-        @Override
-        public void run() {
-            if (currentRequests.isEmpty()) {
-                instance.shutDown(client);
-                InstancesManager.getSingleton().removeInstance(instance);
-                this.cancel();
-            }
-        }
-    }
-
 }

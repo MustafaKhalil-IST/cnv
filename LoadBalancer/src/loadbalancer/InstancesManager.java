@@ -127,7 +127,7 @@ public class InstancesManager {
 
     public void shutDown() {
         for (InstanceProxy instance: instances) {
-            if (instance.status.equals(InstanceStatus.ACTIVE)) {
+            if (instance.status.equals(InstanceStatus.STARTED)) {
                 instance.startShutDown();
             }
         }

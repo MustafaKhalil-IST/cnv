@@ -1,5 +1,5 @@
 package src.loadbalancer;
 
 public enum InstanceStatus {
-    ACTIVE, STARTING, STARTED ,STOPPING, STOPPED;
+    STARTING, STARTED ,STOPPING, STOPPED;
 }

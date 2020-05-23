@@ -1,0 +1,28 @@
+package src.loadbalancer;
+
+import com.amazonaws.services.ec2.AmazonEC2;
+
+import java.util.TimerTask;
+import java.util.logging.Logger;
+
+class CheckStatusTask extends TimerTask {
+    private final static Logger logger = Logger.getLogger(InstanceProxy.class.getName());
+    AmazonEC2 client;
+    InstanceProxy instance;
+
+    public CheckStatusTask(AmazonEC2 client, InstanceProxy instance){
+        this.client = client;
+        this.instance = instance;
+    }
+
+    public void run() {
+        logger.info("Checking Status of Instance " + instance.instanceID);
+        if(instance.status.equals(InstanceStatus.STARTING)){
+            if (instance.updateState(client)) {
+                this.cancel();
+            }
+        } else {
+            this.cancel();
+        }
+    }
+}
