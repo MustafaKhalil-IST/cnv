@@ -10,12 +10,12 @@ public class AutoScaler implements Runnable{
     static PropertiesReader reader = PropertiesReader.getSingleton();
     static Timer monitor = new Timer();
     public static ScalingPolicy INCREASE = new ScalingPolicy(
-            Integer.parseInt(reader.getProperty("auto-scale.increase.load")) / InstanceProxy.MAX_LOAD,
+            Double.parseDouble(reader.getProperty("auto-scale.increase.load")) / InstanceProxy.MAX_LOAD,
             Integer.parseInt(reader.getProperty("auto-scale.increase.load.for.more.than")),
             Integer.parseInt(reader.getProperty("auto-scale.increase.max.instances")));
 
     public static ScalingPolicy DECREASE = new ScalingPolicy(
-            Integer.parseInt(reader.getProperty("auto-scale.decrease.load")) / InstanceProxy.MAX_LOAD,
+            Double.parseDouble(reader.getProperty("auto-scale.decrease.load")) / InstanceProxy.MAX_LOAD,
             Integer.parseInt(reader.getProperty("auto-scale.decrease.load.for.more.than")),
             Integer.parseInt(reader.getProperty("auto-scale.decrease.min.instances")));
 
