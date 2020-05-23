@@ -127,26 +127,19 @@ public class LoadBalanceHandler implements HttpHandler {
                 InstanceProxy instance = InstancesManager.getSingleton().getBestInstance(cost);
                 instance.addRequest(request, cost);
 
+                String buffer;
                 logger.info("The request will be redirected to: " + instance.getAddress());
-                URL url = new URL("http://" + instance.getAddress() + "/sudoku?" + request.getQuery());
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setUseCaches(false);
-                connection.setDoInput(true);
-                connection.setDoOutput(true);
-                connection.addRequestProperty("Content-Type", "application/" + "POST");
-                if (body != null) {
-                    connection.setRequestProperty("Content-Length", Integer.toString(body.length()));
-                    try {
-                        connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
-                    } catch (ConnectException ce) {
-                        logger.warning(ce.getMessage());
-                        // Retry sending the request when getting a connection refuse after 5 seconds
-                        Thread.sleep(5000); // TODO
+                try {
+                    URL url = new URL("http://" + instance.getAddress() + "/sudoku?" + request.getQuery());
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setUseCaches(false);
+                    connection.setDoInput(true);
+                    connection.setDoOutput(true);
+                    connection.addRequestProperty("Content-Type", "application/" + "POST");
+                    if (body != null) {
+                        connection.setRequestProperty("Content-Length", Integer.toString(body.length()));
                         connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
                     }
-                }
-                String buffer;
-                try {
                     InputStream is = connection.getInputStream();
                     InputStreamReader isr = new InputStreamReader(is);
                     BufferedReader in = new BufferedReader(isr);
@@ -154,6 +147,7 @@ public class LoadBalanceHandler implements HttpHandler {
                     in.close();
                 } catch (Exception e) {
                     /*In case of failure, redirect the request to the next instance*/
+                    logger.warning("Exception while redirecting: " + e.getMessage() + ", trying another instance ... ");
                     continue;
                 }
 

@@ -96,6 +96,7 @@ public class InstanceProxy {
         DescribeInstancesResult describeInstancesResult = describeInstance(client);
         InstanceState state = describeInstancesResult.getReservations().get(0).getInstances().get(0).getState();
         if(state.getName().equals(InstanceStateName.Pending.toString())){
+            logger.info("Instance " + this.instanceID + " is starting ...");
             this.status = InstanceStatus.STARTING;
             return false;
         }
@@ -106,6 +107,8 @@ public class InstanceProxy {
             return true;
         }
         else {
+            logger.info("Instance " + this.instanceID + " has been terminated or stopped");
+            this.status = InstanceStatus.STOPPED;
             return false;
         }
     }
