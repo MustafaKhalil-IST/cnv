@@ -21,6 +21,7 @@ class CheckStatusTask extends TimerTask {
         instance.updateStatus(client);
         if (instance.status.equals(InstanceStatus.STOPPED)) {
             InstancesManager.getSingleton().removeInstance(instance);
+            this.cancel();
         }
     }
 }
