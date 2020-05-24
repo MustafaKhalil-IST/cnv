@@ -7,54 +7,55 @@
 Create An AWS instance and connect to it using a ssh client (like PUTTY ...)
 1-  ```sh    
     $ sudo yum install java-1.7.0-openjdk-devel.x86_64 
-    ```
+    ```<br />
 2-  ```sh    
     $ sudo yum install git 
-    ```
+    ```<br />
 3-  ```sh    
     $ git clone https://github.com/MustafaKhalil-IST/cnv
-    ```
+    ```<br />
 4-  ```sh    
     $ cd ../../~root;   
-    ```
+    ```<br />
 5- ```sh    
     $ mkdir .aws  
-    ```
+    ```<br />
 6- ```sh
     $ nano .aws/credentials
-    ```  
+    ```  <br />
 and paste and replace with your keys
 [default]
 
 aws_access_key_id=<aws_access_key_id>
 
-aws_secret_access_key=<aws_secret_access_key>
+aws_secret_access_key=<aws_secret_access_key> <br />
 7-  ```sh
     $ mkdir cnv/libs
-    ```
+    ```<br />
 8-  ```sh
     $ cd cnv/libs
-    ```
+    ```<br />
 9-  ```sh
     $ wget http://sdk-for-java.amazonwebservices.com/latest/aws-java-sdk.zip 
-    ```
+    ```<br />
 10- ```sh
     $ unzip aws-java-sdk.zip 
-    ```
+    ```<br />
 11- ```sh
     $ rm aws-java-sdk.zip 
-    ```
+    ```<br />
 12- ```sh
     $ cd ~/cnv/MetricsStorage/store
-    ```
+    ```<br />
 13- [Replace XXX with the downloaded version number, e.g 786] 
 ```sh
 $ javac -cp ~/cnv/libs/aws-java-sdk-1.11.XXX/lib/aws-java-sdk-1.11.XXX.jar:~/cnv/libs/aws-java-sdk-1.11.XXX/third-party/lib/*:. *.java
 ```
 
-14- ```sh
+14- 
+```sh
     $ cd /home/ec2-user/cnv/
-    ```
+```
 15- ```sh
     $ javac -cp ~/cnv/MetricsStorage:/home/ec2-user/cnv/lib/BIT/BIT/ Instrumentation.java
     ```
@@ -74,9 +75,10 @@ $ java -cp /home/ec2-user/cnv/instrumented/:/home/ec2-user/cnv/project/:/home/ec
     ```sh
     $ java -cp /home/ec2-user/cnv/instrumented/:/home/ec2-user/cnv/project/:/home/ec2-user/cnv/lib/BIT/BIT/:/home/ec2-user/cnv/MetricsStorage/:/home/ec2-user/cnv/libs/aws-java-sdk-1.11.XXX/lib/aws-java-sdk-1.11.XXX.jar:/home/ec2-user/cnv/libs/aws-java-sdk-1.11.XXX/third-party/lib/*:/home/ec2-user/cnv/ -XX:-UseSplitVerifier pt.ulisboa.tecnico.cnv.server.WebServer
     ```
-20- ```sh
-    $ sudo chmod +x /etc/rc.local
-    ```
+19- 
+```sh
+$ sudo chmod +x /etc/rc.local
+```
 21- ```sh
     $ sudo nano /etc/rc.local/
     ```
@@ -84,62 +86,63 @@ paste
 ```sh
 $ java -cp /home/ec2-user/cnv/instrumented/:/home/ec2-user/cnv/project/:/home/ec2-user/cnv/lib/BIT/BIT/:/home/ec2-user/cnv/MetricsStorage/:/home/ec2-user/cnv/libs/aws-java-sdk-1.11.XXX/lib/aws-java-sdk-1.11.XXX.jar:/home/ec2-user/cnv/libs/aws-java-sdk-1.11.XXX/third-party/lib/*:/home/ec2-user/cnv/ -XX:-UseSplitVerifier pt.ulisboa.tecnico.cnv.server.WebServer
 ```
-and close it.
-22- stop the instance then start it
-23- Create an image of the instance
+and close it. <br />
+22- stop the instance then start it <br />
+23- Create an image of the instance <br />
 
 
 ### In Load Balancer Instance
 
 24- ```sh
         $ sudo yum install java-1.7.0-openjdk-devel.x86_64
-        ```
+        ```<br />
 25- ```sh
         $ sudo yum install git
-        ```
+        ```<br />
 26- ```sh
         $ git clone https://github.com/MustafaKhalil-IST/cnv
-        ```
+        ```<br />
 27- ```sh
         $ cd ../../~root;
-        ```
+        ```<br />
 28- ```sh
         $ mkdir .aws
-        ```
+        ```<br />
 29- ```sh
         $ nano .aws/credentials
-        ```
+        ```<br />
 30- paste 
 
 [default]
 
 aws_access_key_id=<aws_access_key_id>
 
-aws_secret_access_key=<aws_secret_access_key>
+aws_secret_access_key=<aws_secret_access_key> <br />
 
 31- ```sh
         $ cd /home/ec2-user/cnv/LoadBalancer/
-        ```
+        ```<br />
 32- ```sh
         $ sh clean_compile.sh
         ```
 33- Run the server: 
 ```sh
 $ java -cp /home/ec2-user/cnv/LoadBalancer/:/home/ec2-user/cnv/MetricsStorage/:/home/ec2-user/cnv/libs/aws-java-sdk-1.11.786/lib/aws-java-sdk-1.11.786.jar:/home/ec2-user/cnv/libs/aws-java-sdk-1.11.786/third-party/lib/*  -XX:-UseSplitVerifier LoadBalancer
-```
-
-34- Create an image of the instance
-35- You can change the configuration from the properties file.
+``` 
+<br />
+34- Create an image of the instance <br />
+35- You can change the configuration from the properties file. <br />
 
 ### Development
 1- Instrumentation Java Class: make your changes then compile it with 
 ```sh
 $ javac -cp ~/cnv/MetricsStorage:/home/ec2-user/cnv/lib/BIT/BIT/ Instrumentation.java
 ```
-Then you will need to reinstrument the files in project package using:
+
+Then you will need to reinstrument the files in project package using: <br />
  ```sh
 $ java -cp /home/ec2-user/cnv/BIT/BIT/:/home/ec2-user/cnv/BIT/BIT/samples/:/home/ec2-user/cnv/ -XX:-UseSplitVerifier Instrumentation project/pt/ulisboa/tecnico/cnv/solver/ instrumented/pt/ulisboa/tecnico/cnv/solver/
-```
+``` 
 
 2- MetricsStorage package: make your changes then compile it with
 ```sh
@@ -151,4 +154,5 @@ $ javac -cp /home/ec2-user/cnv/libs/aws-java-sdk-1.11.XXX/lib/aws-java-sdk-1.11.
 $ sh /home/ec2-user/cnv/LoadBalancer/clean_compile.sh
 ```
 
+<br />
 PS: w e had some problems when trying to produce jars, so we used this way of using classes.
