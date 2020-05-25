@@ -94,15 +94,6 @@ public class DynamoStore {
         mapper.save(metrics);
     }
 
-    public void storeEstimate(Request request, long estimate) {
-        Metrics metrics = mapper.load(Metrics.class, request.getRequestID());
-        if (metrics == null) {
-            metrics = new Metrics(request);
-        }
-        metrics.setEstimatedNumberOfCalls(estimate);
-        mapper.save(metrics);
-    }
-
     public PaginatedScanList<Metrics> getRequestMetricsToProcess() {
         Map<String, AttributeValue> values = new HashMap<>();
         values.put(":zero", new AttributeValue().withN(String.valueOf(0)));
