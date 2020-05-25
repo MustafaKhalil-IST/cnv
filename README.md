@@ -156,3 +156,9 @@ $ sh /home/ec2-user/cnv/LoadBalancer/clean_compile.sh
 
 <br />
 PS: w e had some problems when trying to produce jars, so we used this way of using classes.
+So for easy use just run
+```sh
+$ sh setup.sh
+$ sh /project/run.sh // to run the webserver
+$ sh /LoadBalancer/run.sh // to run the load balancer
+``` 

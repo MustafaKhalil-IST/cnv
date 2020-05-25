@@ -1,0 +1,1 @@
+java -cp /home/ec2-user/cnv/instrumented/:/home/ec2-user/cnv/project/:/home/ec2-user/cnv/lib/BIT/BIT/:/home/ec2-user/cnv/MetricsStorage/:/home/ec2-user/cnv/libs/aws-java-sdk-1.11.XXX/lib/aws-java-sdk-1.11.XXX.jar:/home/ec2-user/cnv/libs/aws-java-sdk-1.11.XXX/third-party/lib/*:/home/ec2-user/cnv/ -XX:-UseSplitVerifier pt.ulisboa.tecnico.cnv.server.WebServer
