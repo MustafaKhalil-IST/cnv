@@ -148,6 +148,7 @@ public class LoadBalanceHandler implements HttpHandler {
                 } catch (Exception e) {
                     /*In case of failure, redirect the request to the next instance*/
                     logger.warning("Exception while redirecting: " + e.getMessage() + ", trying another instance ... ");
+                    instance.updateInstanceLoad(request);
                     continue;
                 }
 
