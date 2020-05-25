@@ -15,7 +15,6 @@ import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 
 import java.io.FileWriter;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -32,35 +31,12 @@ public class DynamoStore {
     }
 
     public void init() {
-        try {
-            FileWriter fw = new FileWriter("/home/ec2-user/debug.txt");
-            fw.write("init");
-            fw.close();
-        } catch (Exception io) {
-            System.out.println(2);
-        }
         AWSCredentialsProviderChain credentialsProvider;
         try {
             credentialsProvider = new DefaultAWSCredentialsProviderChain();
         }
         catch (Exception e) {
-            try {
-                FileWriter fw = new FileWriter("/home/ec2-user/debug.txt");
-                fw.write(e.getMessage());
-                fw.close();
-            } catch (Exception io) {
-                System.out.println(2);
-            }
-
             throw new RuntimeException("Credentials not found", e);
-        }
-
-        try {
-            FileWriter fw = new FileWriter("/home/ec2-user/debug.txt");
-            fw.write("creds are there");
-            fw.close();
-        } catch (Exception io) {
-            System.out.println(2);
         }
 
         client = AmazonDynamoDBClientBuilder
@@ -110,17 +86,12 @@ public class DynamoStore {
 
     public void storeCallsCount(long threadID, long methodCount) {
         Request request = getRequestInformation(threadID);
-        System.out.println("request: " + (request == null));
-        System.out.println("mapper: " + (mapper == null));
         Metrics metrics = mapper.load(Metrics.class, request.getRequestID());
-        System.out.println("1 - metric is null: " + (metrics == null));
         if (metrics == null) {
             metrics = new Metrics(request);
         }
-	System.out.println("2 - metric is null: " + (metrics == null));
         metrics.setNumberOfCalls(methodCount);
         mapper.save(metrics);
-	System.out.println("metrics saved " + methodCount);
     }
 
     public void storeEstimate(Request request, long estimate) {
@@ -128,7 +99,6 @@ public class DynamoStore {
         if (metrics == null) {
             metrics = new Metrics(request);
         }
-        logger.info("Estimate for: " + request.getRequestID() + " is " + estimate);
         metrics.setEstimatedNumberOfCalls(estimate);
         mapper.save(metrics);
     }

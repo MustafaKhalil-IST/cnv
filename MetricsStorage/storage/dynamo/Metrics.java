@@ -12,7 +12,6 @@ public class Metrics {
     private String requestID;
     private Request request;
     private long numberOfCalls;
-    private long estimatedNumberOfCalls;
     private long currentNumberOfCalls;
 
     public Metrics() {
@@ -51,15 +50,6 @@ public class Metrics {
 
     public void setNumberOfCalls(long numberOfCalls) {
         this.numberOfCalls = numberOfCalls;
-    }
-
-    @DynamoDBAttribute(attributeName = "estimatedNumberOfCalls")
-    public long getEstimatedNumberOfCalls() {
-        return estimatedNumberOfCalls;
-    }
-
-    public void setEstimatedNumberOfCalls(long estimatedNumberOfCalls) {
-        this.estimatedNumberOfCalls = estimatedNumberOfCalls;
     }
 
     @DynamoDBAttribute(attributeName = "currentNumberOfCalls")

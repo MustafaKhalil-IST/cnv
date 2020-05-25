@@ -5,8 +5,8 @@ public abstract class AbstractSudokuSolver implements SudokuSolver{
 
     protected String name;
 
-    static int SIZE;
-    static int BOX_SIZE;
+    int SIZE;
+    int BOX_SIZE;
 
     int[][] puzzle;
     int[][] solution;

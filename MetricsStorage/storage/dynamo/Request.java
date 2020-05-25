@@ -3,7 +3,6 @@ package storage.dynamo;
 import java.util.logging.Logger;
 
 public class Request {
-    private static Logger logger = Logger.getLogger(Request.class.getName());
     String requestID;
     Integer dimension;
     Integer missed;

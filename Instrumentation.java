@@ -53,15 +53,13 @@ public class Instrumentation {
     }
 
     public static synchronized void storeCount(String str) {
-	// System.out.println("store " + Thread.currentThread().getId() + " count " + count.get(Thread.currentThread().getId()));
         Store.getStore().storeCallsCount(Thread.currentThread().getId(), count.get(Thread.currentThread().getId()));
         count.put(Thread.currentThread().getId(), 0);
     }
 
     public static synchronized void updateCount(int incr) {
         Integer calls_count = count.get(Thread.currentThread().getId());
-        // System.out.println("update " + Thread.currentThread().getId() + " count " + calls_count);
-	if (calls_count == null) {
+	    if (calls_count == null) {
             count.put(Thread.currentThread().getId(), 0);
         } else {
             count.put(Thread.currentThread().getId(), calls_count + 1);
